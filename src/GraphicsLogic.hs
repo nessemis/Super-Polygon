@@ -1,9 +1,15 @@
-module GraphicsLogic (centerPicture, playerPicture) where
+module GraphicsLogic (centerPicture, playerPicture,fallingRegionsPicture) where
 
 import Model
 import Prelude
 
 import Graphics.Gloss
+------------------------------------------------------
+fallingRegionsPicture :: GameState -> Picture
+fallingRegionsPicture gs = fallingShapePicture (head $ head (fallingRegions gs) )
+
+fallingShapePicture (Square x y) = translate x y $ color white $ regularNPolygon 4
+
 
 ------------------------------------------------------
 
