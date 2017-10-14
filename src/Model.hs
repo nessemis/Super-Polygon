@@ -2,17 +2,28 @@
 --   which represent the state of the game
 module Model where
 
-data InfoToShow = ShowNothing
-                | ShowANumber Int
-                | ShowAChar   Char
+import GraphicsModel
 
-nO_SECS_BETWEEN_CYCLES :: Float
-nO_SECS_BETWEEN_CYCLES = 5
+fallspeed :: Float
+fallspeed = 0.1
+
+type Player        = Float                  --(Region in terms of float).
+data FallingShape  = Square Float Float     --Region (Distance bottom to floor) Height
+type FallingRegion = [FallingShape]
+
+data InputState = InputState {
+  keyLeft  :: Bool,
+  keyRight :: Bool
+}
 
 data GameState = GameState {
-                   infoToShow  :: InfoToShow
-                 , elapsedTime :: Float
+                   menu           :: Bool
+                 , hit            :: Bool
+                 , player         :: Player
+                 , fallingRegions :: [FallingRegion]
+                 , inputState     :: InputState
+                 , elapsedTime    :: Float
                  }
 
 initialState :: GameState
-initialState = GameState ShowNothing 0
+initialState = GameState False False 0 [[Square 2 0.5],[],[],[],[]] (InputState False False) 0
