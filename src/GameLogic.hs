@@ -14,10 +14,10 @@ updateFallingShape elapsedTime shape = case shape of
 
 movePlayer :: Player -> InputState -> Player
 movePlayer p InputState{keyLeft = a, keyRight = b}
-  | a         = p + d
-  | b         = p - d 
+  | a         = p - d
+  | b         = p + d 
   | otherwise = p
-    where d = 0.01
+    where d = 0.02
 
 isHit :: Player -> [FallingRegion] -> [FallingRegion] -> Bool
 isHit p oldRegions newRegions = or $ map hitTuples regionMap
