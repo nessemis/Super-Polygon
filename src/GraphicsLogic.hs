@@ -11,7 +11,8 @@ import Graphics.Gloss
 
 --Not working
 fallingRegionsPicture :: GameState -> Picture
-fallingRegionsPicture gs = fallingShapePicture (head $ head (fallingRegions gs) )
+fallingRegionsPicture gs = pictures [regionPicture t n (fallingRegions gs !! n)| n <- [0 .. (t - 1)]]
+        where t = length (fallingRegions gs)
 
 -------------------------------------------------------
 --CENTER POLYGON---------------------------------------
@@ -47,20 +48,22 @@ playerEdges = rotate 90.0 . const (regularNPolygon 3)
 
 --Not working
 regionPicture :: Int -> Int -> FallingRegion -> Picture
-regionPicture t n r = pictures (map (squarePicture n) )
+regionPicture t n r = rotate (360 * (fromIntegral n) / (fromIntegral t)) $ pictures (map (squarePicture t) r)
 
 --------------------------------------------------------
 
-squarePicture :: Int -> Float -> Float -> Picture
-squarePicture n d h = squareColor d h n
+squarePicture :: Int -> FallingShape -> Picture
+squarePicture t (FallingShape d h) = squareColor d h t
 
 squareColor :: Float -> Float -> Int -> Picture
-squareColor d h n = color red (squareEdges d h n)
+squareColor d h t = color red (squareEdges d h t)
 
 squareEdges :: Float -> Float -> Int -> Picture
-squareEdges d h n = polygon [(d, 0), (d + h, 0), ((d + h) * sin(angle), (d + h) * cos(angle)), (d * sin(angle), d * cos(angle))]
-        where angle = 2.0 * pi / (fromIntegral n)
+squareEdges d h t = polygon [(d, 0), (d + h, 0), ((d + h) * cos(angle), (d + h) * sin(angle)), (d * cos(angle), d * sin(angle))]
+        where angle = 2.0 * pi / (fromIntegral t)
+
+--------------------------------------------------------
 
 regularNPolygon :: Int -> Picture
-regularNPolygon n = polygon [(sin (x * stepSize), cos (x * stepSize)) | a <- [0 .. (n - 1)], let x = fromIntegral a]
-    where stepSize = 2 * pi / (fromIntegral n)
+regularNPolygon t = polygon [(sin (x * stepSize), cos (x * stepSize)) | a <- [0 .. (t - 1)], let x = fromIntegral a]
+    where stepSize = 2 * pi / (fromIntegral t)
