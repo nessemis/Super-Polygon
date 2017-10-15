@@ -9,11 +9,9 @@ import Graphics.Gloss
 --FALLINGREGIONS---------------------------------------
 -------------------------------------------------------
 
+--Not working
 fallingRegionsPicture :: GameState -> Picture
 fallingRegionsPicture gs = fallingShapePicture (head $ head (fallingRegions gs) )
-
-fallingShapePicture (Square x y) = translate x y $ rotate 45 $ color blue $ regularNPolygon 4
-
 
 -------------------------------------------------------
 --CENTER POLYGON---------------------------------------
@@ -47,6 +45,7 @@ playerEdges = rotate 90.0 . const (regularNPolygon 3)
 -- POLYGON DRAWER--------------------------------------
 -- ====================================================
 
+--Not working
 regionPicture :: Int -> Int -> FallingRegion -> Picture
 regionPicture t n r = pictures (map (squarePicture n) )
 
