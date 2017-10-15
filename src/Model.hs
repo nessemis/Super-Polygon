@@ -7,9 +7,9 @@ import GraphicsModel
 fallspeed :: Float
 fallspeed = 0.1
 
-type Player        = Float                  --(Region in terms of float).
-data FallingShape  = Square Float Float     --Region (Distance bottom to floor) Height
-type FallingRegion = [FallingShape]
+type Player          = Float                  --(Region in terms of float).
+data  FallingShape   = FallingShape Float Float --(Distance bottom to floor) Height 
+type FallingRegion   = [FallingShape]
 
 data InputState = InputState {
   keyLeft  :: Bool,
@@ -26,4 +26,4 @@ data GameState = GameState {
                  }
 
 initialState :: GameState
-initialState = GameState False False 0 [[Square 2 0.5],[],[],[],[]] (InputState False False) 0
+initialState = GameState False False 0 [[FallingShape 2 0.5],[],[],[],[]] (InputState False False) 0
