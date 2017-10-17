@@ -11,6 +11,9 @@ import Control.Monad.IO.Class
 fallspeed :: Float
 fallspeed = 1
 
+drawingDistance :: Float
+drawingDistance = 20
+
 type Player          = Float                  --(Region in terms of float).
 data  FallingShape   = FallingShape Float Float --(Distance bottom to floor) Height 
 type FallingRegion   = [FallingShape]
@@ -31,15 +34,15 @@ data GameState = GameState {
 
 
                  
-initialState :: GameState
-initialState = GameState False False 0  ( liftIO (readLevelFile "lvl.txt")) (InputState False False) 0
+initialState :: [FallingRegion] -> GameState
+initialState fr = GameState False False 0 fr (InputState False False) 0
 --initialState = GameState False False 0 [[FallingShape 3 1],[FallingShape 4 1], [FallingShape 5 2], [FallingShape 6 1]] (InputState False False) 0
 
 
 readLevelFile :: FilePath -> IO [FallingRegion]
 readLevelFile f = do
             fileContent <-  readFile f
-            return ( (map lineToFallingRegion (lines fileContent)))
+            return (map lineToFallingRegion (lines fileContent))
 
 lineToFallingRegion ::  String -> FallingRegion
 lineToFallingRegion s = map textShapeToFallingShape (splitOn' (==',') s) 

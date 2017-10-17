@@ -10,14 +10,19 @@ updateFallingRegion elapsedTime region = map (updateFallingShape elapsedTime) re
 
 updateFallingShape :: Float -> FallingShape -> FallingShape
 updateFallingShape elapsedTime shape = case shape of
-  FallingShape d x -> FallingShape (d - (fallspeed * elapsedTime)) x
-
-movePlayer :: Player -> InputState -> Player
-movePlayer p InputState{keyLeft = a, keyRight = b}
+  FallingShape 0 x -> FallingShape 0 (if(translation <= 0) then 0 else translation)
+            where translation = (x - fallspeed * elapsedTime)
+  FallingShape d x -> FallingShape (if(translation <= 0) then 0 else translation) x
+            where translation = (d - (fallspeed * elapsedTime) )
+                  
+                  
+movePlayer :: Player -> InputState -> Bool -> Player
+movePlayer p InputState{keyLeft = a, keyRight = b} ishit
+ -- | ishit     = p
   | a         = p - d
   | b         = p + d 
   | otherwise = p
-    where d = 0.02
+    where d = 0.05
 
 isHit :: Player -> [FallingRegion] -> [FallingRegion] -> Bool
 isHit p oldRegions newRegions = or $ map hitTuples regionMap
