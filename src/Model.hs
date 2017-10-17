@@ -2,7 +2,11 @@
 --   which represent the state of the game
 module Model where
 
-import GraphicsModel
+--import GraphicsModel
+
+import System.IO
+import Control.Monad
+import Control.Monad.IO.Class
 
 fallspeed :: Float
 fallspeed = 1
@@ -25,5 +29,29 @@ data GameState = GameState {
                  , elapsedTime    :: Float
                  }
 
+
+                 
 initialState :: GameState
-initialState = GameState False False 0 [[FallingShape 3 1],[FallingShape 4 1], [FallingShape 5 2], [FallingShape 6 1]] (InputState False False) 0
+initialState = GameState False False 0  ( liftIO (readLevelFile "lvl.txt")) (InputState False False) 0
+--initialState = GameState False False 0 [[FallingShape 3 1],[FallingShape 4 1], [FallingShape 5 2], [FallingShape 6 1]] (InputState False False) 0
+
+
+readLevelFile :: FilePath -> IO [FallingRegion]
+readLevelFile f = do
+            fileContent <-  readFile f
+            return ( (map lineToFallingRegion (lines fileContent)))
+
+lineToFallingRegion ::  String -> FallingRegion
+lineToFallingRegion s = map textShapeToFallingShape (splitOn' (==',') s) 
+                        
+textShapeToFallingShape :: String ->  FallingShape
+textShapeToFallingShape s = FallingShape (read $ head numbers) (read $ head $ tail numbers)
+                        where numbers = splitOn' (==' ') s
+
+
+--https://stackoverflow.com/questions/4978578/how-to-split-a-string-in-haskell
+splitOn'     :: (Char -> Bool) -> String -> [String]
+splitOn' p s =  case dropWhile p s of
+                      "" -> []
+                      s' -> w : splitOn' p s''
+                            where (w, s'') = break p s'
