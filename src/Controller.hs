@@ -17,7 +17,7 @@ step secs gstate = return $ gstate {
                           fallingRegions = newRegions,
                           elapsedTime    = elapsedTime gstate + secs }
                             where newRegions = updateRegionsTick secs (fallingRegions gstate)
-                                  newPlayer = movePlayer (player gstate) (inputState gstate) (hit gstate)                          
+                                  newPlayer = movePlayer (player gstate) (inputState gstate) (hit gstate) (fallingRegions gstate)                         
 
 -- | Handle user input
 input :: Event -> GameState -> IO GameState

@@ -1,4 +1,4 @@
-module GraphicsLogic (centerPicture, playerPicture,fallingRegionsPicture) where
+module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture) where
 
 import Model
 import Prelude
@@ -32,7 +32,7 @@ centerEdges = regularNPolygon . length . fallingRegions
 --THE PLAYER-------------------------------------------
 -------------------------------------------------------
 playerPicture :: GameState -> Picture
-playerPicture gs = rotate (360.0 * (player gs) / total) (translate 2.0 0.0 (playerColor gs))
+playerPicture gs =  rotate (360.0 * (player gs) / total) (translate 2.0 0.0 (playerColor gs))
         where total = fromIntegral $ length $ fallingRegions gs
 
 playerColor :: GameState -> Picture
@@ -40,6 +40,10 @@ playerColor = color white . playerEdges
 
 playerEdges :: GameState -> Picture
 playerEdges = rotate 90.0 . const (regularNPolygon 3)
+
+playerPosition :: GameState -> Picture
+playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (player gs),
+                    Translate (-200) 0 $ Color yellow $ Text $ show $ fromIntegral $ length (fallingRegions gs)] 
 
 --------------------------------------------------------
 --REGION SHAPE------------------------------------------

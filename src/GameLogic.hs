@@ -16,19 +16,19 @@ updateFallingShape elapsedTime shape = case shape of
             where translation = (d - (fallspeed * elapsedTime) )
                   
                   
-movePlayer :: Player -> InputState -> Bool -> Player
-movePlayer p InputState{keyLeft = a, keyRight = b} ishit
- -- | ishit     = p
-  | a         = p - d
-  | b         = p + d 
+movePlayer :: Player -> InputState -> Bool -> [FallingRegion] -> Player
+movePlayer p InputState{keyLeft = a, keyRight = b} ishit regions
+  | ishit     = p
+  | a         = if (p - d) <= 0            then (regionamount + (p-d)) else (p-d)
+  | b         = if (p + d) >= regionamount then ((p+d) - regionamount) else (p+d)
   | otherwise = p
-    where d = 0.05
-
+    where d = 0.001
+          regionamount = fromIntegral $ length regions
+    
 isHit :: Player -> [FallingRegion] -> [FallingRegion] -> Bool
 isHit p oldRegions newRegions = or $ map hitTuples regionMap
   where 
         hitTuples (o, n) = (not (shapeHitPlayer o)) && (shapeHitPlayer n)             --If the previous frame, the shape didn't hit the player but this one it does, then the player is hit
-        shapeHitPlayer s = case s of
-                              FallingShape h _ -> (h < 0)
+        shapeHitPlayer  (FallingShape h _)  = (h < 0)
         regionMap        = zip (currentRegion oldRegions) (currentRegion newRegions)  --Checks if any of the current regions hit the player.
         currentRegion r  = r !! (floor p)                                             --Obtains the region in which the player is from both new and old regions.
