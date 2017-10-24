@@ -1,10 +1,27 @@
-module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture) where
+module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture,scorePicture) where
 
 import Model
 import Prelude
 
 import Graphics.Gloss
+import Data.Fixed
 
+-------------------------------------------------------
+--SCORE---------------------------------------
+-------------------------------------------------------
+scorePicture :: GameState -> Picture
+scorePicture gs = Translate 20 15   $ 
+                 scale'   $
+                 color'             $
+                 Text $ show $ time
+                    where time = (elapsedTime gs)
+                          color' = color (if  round < lnboop then red else yellow )
+                          scale' = (if round <lnboop then scale (0.05*sinalboop) (0.05*sinalboop) else scale 0.02 0.02)
+                          round  = mod' time booptimes
+                          sinalboop = sin ( round * (lnboop * (booptimes / lnboop) * pi))
+                          lnboop = 0.5
+                          booptimes = 2
+                         
 -------------------------------------------------------
 --FALLINGREGIONS---------------------------------------
 -------------------------------------------------------
