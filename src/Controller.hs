@@ -12,7 +12,7 @@ import System.Random
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
 step secs gstate = return $ gstate {
-                          hit            = isHit (player gstate) (fallingRegions gstate) newRegions, 
+                          hit            = (hit gstate ) || isHit (player gstate) (fallingRegions gstate) newRegions, 
                           player         = newPlayer,
                           fallingRegions = newRegions,
                           elapsedTime    = elapsedTime gstate + secs }

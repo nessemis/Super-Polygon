@@ -39,7 +39,7 @@ playerColor :: GameState -> Picture
 playerColor = color white . playerEdges
 
 playerEdges :: GameState -> Picture
-playerEdges = rotate 90.0 . const (regularNPolygon 3)
+playerEdges = const (regularNPolygon 3)
 
 playerPosition :: GameState -> Picture
 playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (player gs),
@@ -50,14 +50,13 @@ playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color b
 --------------------------------------------------------
 
 regionPicture :: Int -> Int -> FallingRegion -> Picture
-regionPicture t n r = rotate (360 * (fromIntegral n) / (fromIntegral t)) $ pictures (map (squarePicture t) r)
+regionPicture t n r = rotate (360 * (fromIntegral (n + 1)) / (fromIntegral t)) $ pictures (map (squarePicture t) r)
 
 --------------------------------------------------------
 
 squarePicture :: Int -> FallingShape -> Picture
 squarePicture t (FallingShape d h) | (d < drawingDistance) = squareColor d h t
                                    | otherwise = Blank
-                                   
                                    
 squareColor :: Float -> Float -> Int -> Picture
 squareColor d h t = color red (squareEdges d h t)
@@ -71,5 +70,5 @@ squareEdges d h t = polygon [(d, 0), (d + h, 0), ((d + h) * cos(angle), (d + h) 
 -- ====================================================
 
 regularNPolygon :: Int -> Picture
-regularNPolygon t = polygon [(sin (x * stepSize), cos (x * stepSize)) | a <- [0 .. (t - 1)], let x = fromIntegral a]
+regularNPolygon t = polygon [(cos (x * stepSize), sin (x * stepSize)) | a <- [0 .. (t - 1)], let x = fromIntegral a]
     where stepSize = 2 * pi / (fromIntegral t)

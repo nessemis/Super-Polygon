@@ -23,7 +23,7 @@ movePlayer p InputState{keyLeft = a, keyRight = b} ishit regions
   | a         = (p - d) `modP` regionamount 
   | b         = (p + d) `modP` regionamount 
   | otherwise = p
-    where d = 0.001
+    where d = 0.1
           regionamount = fromIntegral $ length regions
 
 modP :: Float -> Int -> Float
@@ -36,6 +36,6 @@ isHit :: Player -> [FallingRegion] -> [FallingRegion] -> Bool
 isHit p oldRegions newRegions = or $ map hitTuples regionMap
   where 
         hitTuples (o, n) = (not (shapeHitPlayer o)) && (shapeHitPlayer n)             --If the previous frame, the shape didn't hit the player but this one it does, then the player is hit
-        shapeHitPlayer  (FallingShape h _)  = (h < 0)
+        shapeHitPlayer  (FallingShape h _)  = (h <= 3)
         regionMap        = zip (currentRegion oldRegions) (currentRegion newRegions)  --Checks if any of the current regions hit the player.
         currentRegion r  = r !! (floor p)                                             --Obtains the region in which the player is from both new and old regions.
