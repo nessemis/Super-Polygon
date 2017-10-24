@@ -1,6 +1,7 @@
 module GameLogic (updateRegionsTick, isHit, movePlayer) where
   
 import Model
+import Data.Fixed
 
 updateRegionsTick :: Float -> [FallingRegion] -> [FallingRegion]
 updateRegionsTick elapsedTime regions = map (updateFallingRegion elapsedTime) regions
@@ -19,11 +20,17 @@ updateFallingShape elapsedTime shape = case shape of
 movePlayer :: Player -> InputState -> Bool -> [FallingRegion] -> Player
 movePlayer p InputState{keyLeft = a, keyRight = b} ishit regions
   | ishit     = p
-  | a         = if (p - d) <= 0            then (regionamount + (p-d)) else (p-d)
-  | b         = if (p + d) >= regionamount then ((p+d) - regionamount) else (p+d)
+  | a         = (p - d) `modP` regionamount 
+  | b         = (p + d) `modP` regionamount 
   | otherwise = p
     where d = 0.001
           regionamount = fromIntegral $ length regions
+
+modP :: Float -> Int -> Float
+modP f i
+  |f < 0     = mod' (f + fi) fi
+  |otherwise = mod' f fi
+    where fi = fromIntegral i
     
 isHit :: Player -> [FallingRegion] -> [FallingRegion] -> Bool
 isHit p oldRegions newRegions = or $ map hitTuples regionMap
