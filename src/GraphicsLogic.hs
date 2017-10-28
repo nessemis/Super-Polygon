@@ -7,8 +7,9 @@ import Graphics.Gloss
 import Data.Fixed
 
 -------------------------------------------------------
---SCORE---------------------------------------
+--SCORE------------------------------------------------
 -------------------------------------------------------
+--Make it Boop for nice effect
 scorePicture :: GameState -> Picture
 scorePicture gs = Translate 20 15   $ 
                  scale'   $
@@ -16,11 +17,11 @@ scorePicture gs = Translate 20 15   $
                  Text $ show $ time
                     where time = (elapsedTime gs)
                           color' = color (if  round < lnboop then red else yellow )
-                          scale' = (if round <lnboop then scale (0.05*sinalboop) (0.05*sinalboop) else scale 0.02 0.02)
-                          round  = mod' time booptimes
-                          sinalboop = sin ( round * (lnboop * (booptimes / lnboop) * pi))
-                          lnboop = 0.5
-                          booptimes = 2
+                          scale' = (if round <lnboop then scale (0.02 + 0.025*sinalboop) (0.02 + 0.025*sinalboop) else scale 0.02 0.02)
+                          round  = mod' time booptime
+                          sinalboop = sin ((((round) / lnboop )) *  pi)
+                          lnboop    = 0.3
+                          booptime = 5
                          
 -------------------------------------------------------
 --FALLINGREGIONS---------------------------------------

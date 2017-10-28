@@ -11,7 +11,9 @@ import System.Random
 
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-step secs gstate = return $ gstate {
+step secs gstate | (keyPause (inputState gstate)) == True = return $ gstate
+                 | otherwise =  
+                          return $ gstate {
                           hit            = (hit gstate ) || isHit (player gstate) (fallingRegions gstate) newRegions, 
                           player         = newPlayer,
                           fallingRegions = newRegions,
@@ -26,7 +28,15 @@ input e gstate = return gstate {inputState = inputKey e (inputState gstate)}
 inputKey :: Event -> InputState -> InputState
 inputKey (EventKey (SpecialKey c) d _ _) istate
   = case c of
-      KeyLeft  -> istate {keyLeft = d == Down}
+      KeyLeft  -> istate {keyLeft  = d == Down}
       KeyRight -> istate {keyRight = d == Down}
       _        -> istate
+      
+inputKey (EventKey (Char c) d _ _) istate
+   = case c of
+        'p' -> case (keyPause istate) of
+                    True -> istate {keyPause = d == Down}
+                    False -> istate {keyPause = d == Up}
+        _   -> istate 
+      
 inputKey _ istate = istate -- Otherwise keep the same
