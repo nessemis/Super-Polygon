@@ -14,12 +14,12 @@ step :: Float -> GameState -> IO GameState
 step secs gstate | (keyPause (inputState gstate)) == True = return $ gstate
                  | otherwise =  
                           return $ gstate {
-                          hit            = (hit gstate ) || isHit (player gstate) (fallingRegions gstate) newRegions, 
+                          hit            = (hit gstate ) || isHit (player gstate) newRegions, 
                           player         = newPlayer,
                           fallingRegions = newRegions,
                           elapsedTime    = elapsedTime gstate + secs }
                             where newRegions = updateRegionsTick secs (fallingRegions gstate)
-                                  newPlayer = movePlayer (player gstate) (inputState gstate) (hit gstate) (fallingRegions gstate)                         
+                                  newPlayer  = movePlayer (player gstate) (inputState gstate) (newRegions)                 
 
 -- | Handle user input
 input :: Event -> GameState -> IO GameState
