@@ -11,13 +11,21 @@ import System.Random
 
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-step secs gstate | (keyPause (inputState gstate)) == True = return $ gstate
+step secs gstate 
+                 | (hit gstate) =
+                          return $ gstate {
+                          fallingRegions = newRegions,
+                          elapsedTime = elapsedTime gstate + secs}
+                 --Pause key pressed   
+                 | (keyPause (inputState gstate)) == True = return $ gstate
+                 --Normal Gameplay
                  | otherwise =  
                           return $ gstate {
                           hit            = (hit gstate ) || isHit (player gstate) newRegions, 
                           player         = newPlayer,
                           fallingRegions = newRegions,
-                          elapsedTime    = elapsedTime gstate + secs }
+                          elapsedTime    = elapsedTime gstate + secs ,
+                          score          = score gstate + secs }
                             where newRegions = updateRegionsTick secs (fallingRegions gstate)
                                   newPlayer  = movePlayer (player gstate) (inputState gstate) (newRegions)                 
 

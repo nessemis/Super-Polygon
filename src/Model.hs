@@ -31,12 +31,13 @@ data GameState = GameState {
                  , fallingRegions :: [FallingRegion]
                  , inputState     :: InputState
                  , elapsedTime    :: Float
+                 , score          :: Float
                  }
 
 
                  
 initialState :: [FallingRegion] -> GameState
-initialState fr = GameState False False 0 fr (InputState False False False) 0
+initialState fr = GameState False False 0 fr (InputState False False False) 0 0
 --initialState = GameState False False 0 [[FallingShape 3 1],[FallingShape 4 1], [FallingShape 5 2], [FallingShape 6 1]] (InputState False False) 0
 
 

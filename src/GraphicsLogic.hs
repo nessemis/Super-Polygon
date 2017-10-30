@@ -5,6 +5,7 @@ import Prelude
 
 import Graphics.Gloss
 import Data.Fixed
+import System.Random
 
 -------------------------------------------------------
 --SCORE------------------------------------------------
@@ -15,7 +16,7 @@ scorePicture gs = Translate 20 15   $
                  scale'   $
                  color'             $
                  Text $ show $ time
-                    where time = (elapsedTime gs)
+                    where time = (score gs)
                           color' = color (if  round < lnboop then red else yellow )
                           scale' = (if round <lnboop then scale (0.02 + 0.025*sinalboop) (0.02 + 0.025*sinalboop) else scale 0.02 0.02)
                           round  = mod' time booptime
@@ -50,12 +51,25 @@ centerEdges = regularNPolygon . length . fallingRegions
 --THE PLAYER-------------------------------------------
 -------------------------------------------------------
 playerPicture :: GameState -> Picture
-playerPicture gs =  rotate (360.0 * (player gs) / total) (translate 2.0 0.0 (playerColor gs))
+playerPicture gs | (hit gs)  = ( trans ( playerColor ( playerDeathEdges) gs))
+                 | otherwise = rot (trans (playerColor (playerEdges) gs))
         where total = fromIntegral $ length $ fallingRegions gs
+              trans = translate 2.0 0.0 
+              rot   = rotate (360.0 * (player gs) / total)
+              
+              
 
-playerColor :: GameState -> Picture
-playerColor = color white . playerEdges
+              
+playerColor :: (GameState -> Picture) -> GameState -> Picture
+playerColor f gs = (color white . f) gs
 
+playerDeathEdges :: GameState -> Picture
+playerDeathEdges gs = pictures [ (rotate y $ scale (0.25) (0.25) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
+                                                        | ex<-[1..4] ,
+                                                          let x = (ex + sin(elapsedTime gs)*10),
+                                                          ey<-[1..4],
+                                                          let y = (ey*75)]
+                                                         
 playerEdges :: GameState -> Picture
 playerEdges = const (regularNPolygon 3)
 
