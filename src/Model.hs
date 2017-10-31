@@ -14,18 +14,28 @@ fallspeed = 1
 drawingDistance :: Float
 drawingDistance = 20
 
-data Player          = Player Float Float       --(Region in terms of float) Animation.
+data Player          = Player Float Float        --(Region in terms of float) Animation.
 data FallingShape    = FallingShape Float Float  --(Distance bottom to floor) Height 
 type FallingRegion   = [FallingShape]
 
 data InputState = InputState {
+  keyEnter :: Bool,
+  keyEscape:: Bool,
   keyPause :: Bool,
   keyLeft  :: Bool,
-  keyRight :: Bool
+  keyRight :: Bool,
+  keyA     :: Bool
+}
+
+data MenuState = MenuState {
+                   
+
+
 }
 
 data GameState = GameState {
-                   menu           :: Bool
+                   menuState      :: MenuState
+                 , menu           :: Bool
                  , hit            :: Bool
                  , player         :: Player
                  , fallingRegions :: [FallingRegion]
@@ -37,8 +47,15 @@ data GameState = GameState {
 
                  
 initialState :: [FallingRegion] -> GameState
-initialState fr = GameState False False (Player 0 0) fr (InputState False False False) 0 0
---initialState = GameState False False 0 [[FallingShape 3 1],[FallingShape 4 1], [FallingShape 5 2], [FallingShape 6 1]] (InputState False False) 0
+initialState fr = GameState MenuState                                              --MenuState data
+                            False                                                   --Is the menu active 
+                            False                                                  --Is the player hit
+                            (Player 0 0)                                           --Player position and animation
+                            fr                                                     --Level data loaded from file 
+                            (InputState False False False False False False)             --Inputstate
+                            0                                                      --Elapsed time                            
+                            0                                                      --Score
+
 
 
 readLevelFile :: FilePath -> IO [FallingRegion]

@@ -61,7 +61,7 @@ playerPicture gs | (hit gs)  = rot ( trans ( playerColor ( playerDeathEdges) gs)
 
               
 playerColor :: (GameState -> Picture) -> GameState -> Picture
-playerColor f gs = (color white . f) gs
+playerColor f gs = if (keyEnter (inputState gs))  then ( color white . f) gs else ( color green . f) gs
 
 playerDeathEdges :: GameState -> Picture
 playerDeathEdges gs = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
@@ -75,7 +75,7 @@ playerDeathEdges gs = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translat
 playerEdges :: GameState -> Picture
 playerEdges = const (regularNPolygon 3)
 
---Helper Function to get the player Position
+--Helper Function to get the player position
 getPos :: Player -> Float
 getPos (Player p a) = p
 --Helper function to get the player animation time

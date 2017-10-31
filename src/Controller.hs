@@ -13,9 +13,11 @@ import System.Random
 step :: Float -> GameState -> IO GameState
 step secs gstate 
                 
-                            
+                 | (menu gstate) = 
+                          return $ gstate {
+                          menu           = not (keyEnter (inputState gstate))} 
                  --Pause key pressed   
-                 | (keyPause (inputState gstate)) == True = return $ gstate
+                 | (keyPause (inputState gstate)) = return $ gstate
                  --GAMEOVER
                  | (hit gstate) =
                           return $ gstate {
@@ -26,6 +28,7 @@ step secs gstate
                  --Normal Gameplay
                  | otherwise =  
                           return $ gstate {
+                          menu           = (keyEscape (inputState gstate)),
                           hit            = (hit gstate ) || isHit (player gstate) newRegions, 
                           player         = newPlayer,
                           fallingRegions = newRegions,
@@ -41,9 +44,16 @@ input e gstate = return gstate {inputState = inputKey e (inputState gstate)}
 inputKey :: Event -> InputState -> InputState
 inputKey (EventKey (SpecialKey c) d _ _) istate
   = case c of
-      KeyLeft  -> istate {keyLeft  = d == Down}
-      KeyRight -> istate {keyRight = d == Down}
+      KeyLeft  -> istate {keyLeft   = d == Down}
+      KeyRight -> istate {keyRight  = d == Down}
+      KeyEsc   -> case (keyEscape istate) of
+                    False -> istate {keyEscape = d == Down}
+                    True -> istate { keyEscape = False}
+      KeyEnter -> case (keyEnter istate) of
+                    False -> istate {keyEnter = d == Down}
+                    True -> istate {keyEscape = False} 
       _        -> istate
+      
 
 --Check for normal keys
 inputKey (EventKey (Char c) d _ _) istate
@@ -51,6 +61,7 @@ inputKey (EventKey (Char c) d _ _) istate
         'p' -> case (keyPause istate) of
                     True -> istate {keyPause = d == Down}
                     False -> istate {keyPause = d == Up}
+        'a' -> istate {keyA = d == Up} 
         _   -> istate 
       
 inputKey _ istate = istate -- Otherwise keep the same
