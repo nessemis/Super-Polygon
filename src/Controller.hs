@@ -12,12 +12,17 @@ import System.Random
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
 step secs gstate 
+                
+                            
+                 --Pause key pressed   
+                 | (keyPause (inputState gstate)) == True = return $ gstate
+                 --GAMEOVER
                  | (hit gstate) =
                           return $ gstate {
                           fallingRegions = newRegions,
-                          elapsedTime = elapsedTime gstate + secs}
-                 --Pause key pressed   
-                 | (keyPause (inputState gstate)) == True = return $ gstate
+                          player         = updateDeathPlayer (player gstate),
+                          inputState     = (inputState gstate),
+                          elapsedTime    = elapsedTime gstate + secs}
                  --Normal Gameplay
                  | otherwise =  
                           return $ gstate {

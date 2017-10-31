@@ -51,11 +51,11 @@ centerEdges = regularNPolygon . length . fallingRegions
 --THE PLAYER-------------------------------------------
 -------------------------------------------------------
 playerPicture :: GameState -> Picture
-playerPicture gs | (hit gs)  = ( trans ( playerColor ( playerDeathEdges) gs))
+playerPicture gs | (hit gs)  = rot ( trans ( playerColor ( playerDeathEdges) gs))
                  | otherwise = rot (trans (playerColor (playerEdges) gs))
         where total = fromIntegral $ length $ fallingRegions gs
               trans = translate 2.0 0.0 
-              rot   = rotate (360.0 * (player gs) / total)
+              rot   = rotate (360.0 * (getPos(player gs)) / total)
               
               
 
@@ -64,18 +64,28 @@ playerColor :: (GameState -> Picture) -> GameState -> Picture
 playerColor f gs = (color white . f) gs
 
 playerDeathEdges :: GameState -> Picture
-playerDeathEdges gs = pictures [ (rotate y $ scale (0.25) (0.25) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
-                                                        | ex<-[1..4] ,
-                                                          let x = (ex + sin(elapsedTime gs)*10),
-                                                          ey<-[1..4],
-                                                          let y = (ey*75)]
+playerDeathEdges gs = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
+                                                        | let x = (getAnimTime (player gs))/30,
+                                                          let z =(x/10+1) ,
+                                                          ey<-[1..12],
+                                                          let y = (ey*30)]
+                                                         
+
                                                          
 playerEdges :: GameState -> Picture
 playerEdges = const (regularNPolygon 3)
 
+--Helper Function to get the player Position
+getPos :: Player -> Float
+getPos (Player p a) = p
+--Helper function to get the player animation time
+getAnimTime :: Player -> Float
+getAnimTime (Player _ aq) = aq
+
 playerPosition :: GameState -> Picture
-playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (player gs),
+playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (getPos (player gs)),
                     Translate (-200) 0 $ Color yellow $ Text $ show $ fromIntegral $ length (fallingRegions gs)] 
+
 
 --------------------------------------------------------
 --REGION SHAPE------------------------------------------
