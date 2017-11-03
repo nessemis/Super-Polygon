@@ -2,6 +2,7 @@ module Main where
 
 import Controller
 import Model
+import Level
 import View
 
 import Graphics.Gloss.Interface.IO.Game
@@ -12,8 +13,7 @@ main = do
         playIO (InWindow "Counter" (1366, 768) (0, 0)) -- Or FullScreen
               black            -- Background color
               60               -- Frames per second
-              (initialState fr)-- Initial state
+              (initializedState fr)     -- Initial state
               view             -- View function
               input            -- Event function
               step             -- Step function
-              

@@ -1,6 +1,7 @@
 module GameLogic (updateRegionsTick, isHit, movePlayer, updateDeathPlayer) where
   
-import Model
+import LevelModel
+import InputModel
 import Data.Fixed
 
 updateRegionsTick :: Float -> [FallingRegion] -> [FallingRegion]

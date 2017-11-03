@@ -15,8 +15,9 @@ view = return . viewPure
 -- viewPure gstate = pictures [ scale 20 20 $ rotate (-18 + (elapsedTime gstate * 100)) $ color white $ polygon [(10,0),(3.0,9.5),(-8.1,5.9),(-8.1,-5.9), ( 3.1 ,-9.5)]]
 
 viewPure :: GameState -> Picture
-viewPure gstate = scale 20 20 $ pictures [(scorePicture gstate),
-                                          (centerPicture gstate),            --Center polygon
-                                          (playerPosition gstate),
-                                          (fallingRegionsPicture gstate),    --FallingRegions
-                                          (playerPicture gstate)]             --Player                                  
+viewPure gstate = scale 20 20 $ pictures [(scorePicture lState),
+                                          (centerPicture lState),            --Center polygon
+                                          (playerPosition lState),
+                                          (fallingRegionsPicture lState),    --FallingRegions
+                                          (playerPicture lState)]             --Player
+    where lState = levelState gstate

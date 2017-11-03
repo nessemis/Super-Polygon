@@ -1,6 +1,8 @@
 module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture,scorePicture) where
 
 import Model
+import LevelModel
+
 import Prelude
 
 import Graphics.Gloss
@@ -11,12 +13,12 @@ import System.Random
 --SCORE------------------------------------------------
 -------------------------------------------------------
 --Make it Boop for nice effect
-scorePicture :: GameState -> Picture
-scorePicture gs = Translate 20 15   $ 
+scorePicture :: LevelState -> Picture
+scorePicture ls = Translate 20 15   $ 
                  scale'   $
                  color'             $
                  Text $ show $ time
-                    where time = (score gs)
+                    where time = (score ls)
                           color' = color (if  round < lnboop then red else yellow )
                           scale' = (if round <lnboop then scale (0.02 + 0.025*sinalboop) (0.02 + 0.025*sinalboop) else scale 0.02 0.02)
                           round  = mod' time booptime
@@ -28,51 +30,50 @@ scorePicture gs = Translate 20 15   $
 --FALLINGREGIONS---------------------------------------
 -------------------------------------------------------
 
-fallingRegionsPicture :: GameState -> Picture
-fallingRegionsPicture gs = pictures [regionPicture t n (fallingRegions gs !! n)| n <- [0 .. (t - 1)] ]
-        where t = length (fallingRegions gs)
+fallingRegionsPicture :: LevelState -> Picture
+fallingRegionsPicture ls = pictures [regionPicture t n (fallingRegions ls !! n)| n <- [0 .. (t - 1)] ]
+        where t = length (fallingRegions ls)
 
 -------------------------------------------------------
 --CENTER POLYGON---------------------------------------
 -------------------------------------------------------
 
-centerPicture :: GameState -> Picture
-centerPicture gs = (rotate timeStep . centerColor) gs
+centerPicture :: LevelState -> Picture
+centerPicture ls = (rotate timeStep . centerColor) ls
     where 
-        timeStep = elapsedTime gs * 20
+        timeStep = elapsedTime ls * 20
 
-centerColor :: GameState -> Picture
+centerColor :: LevelState -> Picture
 centerColor = color red . centerEdges
 
-centerEdges :: GameState -> Picture
+centerEdges :: LevelState -> Picture
 centerEdges = regularNPolygon . length . fallingRegions
 
 -------------------------------------------------------
 --THE PLAYER-------------------------------------------
 -------------------------------------------------------
-playerPicture :: GameState -> Picture
-playerPicture gs | (hit gs)  = rot ( trans ( playerColor ( playerDeathEdges) gs))
-                 | otherwise = rot (trans (playerColor (playerEdges) gs))
-        where total = fromIntegral $ length $ fallingRegions gs
+playerPicture :: LevelState -> Picture
+playerPicture ls | (hit ls)  = rot ( trans ( playerColor ( playerDeathEdges) ls))
+                 | otherwise = rot (trans (playerColor (playerEdges) ls))
+        where total = fromIntegral $ length $ fallingRegions ls
               trans = translate 2.0 0.0 
-              rot   = rotate (360.0 * (getPos(player gs)) / total)
+              rot   = rotate (360.0 * (getPos(player ls)) / total)
               
               
+playerColor :: (LevelState -> Picture) -> LevelState -> Picture
+--playerColor f ls = if (keyEnter (inputState ls))  then ( color white . f) ls else ( color green . f) ls
+playerColor f ls = (color white . f) ls
 
-              
-playerColor :: (GameState -> Picture) -> GameState -> Picture
-playerColor f gs = if (keyEnter (inputState gs))  then ( color white . f) gs else ( color green . f) gs
 
-playerDeathEdges :: GameState -> Picture
-playerDeathEdges gs = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
-                                                        | let x = (getAnimTime (player gs))/30,
+playerDeathEdges :: LevelState -> Picture
+playerDeathEdges ls = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
+                                                        | let x = (getAnimTime (player ls))/30,
                                                           let z =(x/10+1) ,
                                                           ey<-[1..12],
                                                           let y = (ey*30)]
-                                                         
 
                                                          
-playerEdges :: GameState -> Picture
+playerEdges :: LevelState -> Picture
 playerEdges = const (regularNPolygon 3)
 
 --Helper Function to get the player position
@@ -82,9 +83,9 @@ getPos (Player p a) = p
 getAnimTime :: Player -> Float
 getAnimTime (Player _ aq) = aq
 
-playerPosition :: GameState -> Picture
-playerPosition gs = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (getPos (player gs)),
-                    Translate (-200) 0 $ Color yellow $ Text $ show $ fromIntegral $ length (fallingRegions gs)] 
+playerPosition :: LevelState -> Picture
+playerPosition ls = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (getPos (player ls)),
+                    Translate (-200) 0 $ Color yellow $ Text $ show $ fromIntegral $ length (fallingRegions ls)] 
 
 
 --------------------------------------------------------

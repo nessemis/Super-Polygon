@@ -9,10 +9,18 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import System.Random
 
+import MenuModel
+import InputModel
+import LevelModel
+
+
+import Menu
+import Input
+import Level
+
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-step secs gstate 
-                
+{- step secs gstate 
                  | (menu gstate) = 
                           return $ gstate {
                           menu           = not (keyEnter (inputState gstate))} 
@@ -36,32 +44,21 @@ step secs gstate
                           score          = score gstate + secs }
                             where newRegions = updateRegionsTick secs (fallingRegions gstate)
                                   newPlayer  = movePlayer (player gstate) (inputState gstate) (newRegions)                 
+-}
+
+step secs gstate = return gstate {
+  inputState = updateInputState (inputState gstate),
+  menuState  = updateMenuState (inputState gstate) (menuState gstate),
+  levelState = updateLevelState secs (inputState gstate) (levelState gstate)
+}
+
+--temporary, for starting with a loaded level
+
+initializedState :: [FallingRegion] -> GameState
+initializedState fr = GameState initialInputState initialMenuState (initializeLevelState fr)
+
+----------------------------------------------
 
 -- | Handle user input
 input :: Event -> GameState -> IO GameState
 input e gstate = return gstate {inputState = inputKey e (inputState gstate)}
-
-inputKey :: Event -> InputState -> InputState
-inputKey (EventKey (SpecialKey c) d _ _) istate
-  = case c of
-      KeyLeft  -> istate {keyLeft   = d == Down}
-      KeyRight -> istate {keyRight  = d == Down}
-      KeyEsc   -> case (keyEscape istate) of
-                    False -> istate {keyEscape = d == Down}
-                    True -> istate { keyEscape = False}
-      KeyEnter -> case (keyEnter istate) of
-                    False -> istate {keyEnter = d == Down}
-                    True -> istate {keyEscape = False} 
-      _        -> istate
-      
-
---Check for normal keys
-inputKey (EventKey (Char c) d _ _) istate
-   = case c of
-        'p' -> case (keyPause istate) of
-                    True -> istate {keyPause = d == Down}
-                    False -> istate {keyPause = d == Up}
-        'a' -> istate {keyA = d == Up} 
-        _   -> istate 
-      
-inputKey _ istate = istate -- Otherwise keep the same
