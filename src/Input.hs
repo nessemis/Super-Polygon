@@ -8,6 +8,7 @@ updateInputState :: InputState -> InputState
 updateInputState inputState = inputState {
     keyLeftPress  = False,
     keyRightPress = False,
+    keyPausePress = False,
     keyEscPress   = False,
     keyEnterPress = False
 }

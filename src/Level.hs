@@ -12,12 +12,15 @@ initializeLevelState fr = initialLevelState {fallingRegions = fr}
 
 updateLevelState :: Float -> InputState -> LevelState -> LevelState
 updateLevelState secs input lvlState 
-    | paused lvlState  = lvlState
+    | paused lvlState  = lvlState {
+        paused         = not $ keyPausePress input         
+    }
     | hit lvlState     = lvlState {
         player         = updateDeathPlayer (player lvlState),
         fallingRegions = newRegions
     }
     | otherwise        = lvlState {
+        paused         = keyPausePress input, 
         hit            = (hit lvlState ) || isHit (player lvlState) newRegions, 
         player         = newPlayer,
         fallingRegions = newRegions,
