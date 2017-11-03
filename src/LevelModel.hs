@@ -6,7 +6,7 @@ fallspeed = 1
 drawingDistance :: Float
 drawingDistance = 30
 
-data Player          = Player Float Float        --(Region in terms of float) Animation.
+data Player        = Player Float Float        --(Region in terms of float) Animation.
 data FallingShape  = FallingShape Float Float --(Distance bottom to floor) Height 
 type FallingRegion = [FallingShape]
 

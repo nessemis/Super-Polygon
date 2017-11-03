@@ -14,6 +14,7 @@ updateLevelState :: Float -> InputState -> LevelState -> LevelState
 updateLevelState secs input lvlState 
     | paused lvlState  = lvlState
     | hit lvlState     = lvlState {
+        player         = updateDeathPlayer (player lvlState),
         fallingRegions = newRegions
     }
     | otherwise        = lvlState {
