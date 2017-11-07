@@ -8,6 +8,7 @@ import GameLogic
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import System.Random
+import System.Exit
 
 import MenuModel
 import InputModel
@@ -46,11 +47,26 @@ step :: Float -> GameState -> IO GameState
                                   newPlayer  = movePlayer (player gstate) (inputState gstate) (newRegions)                 
 -}
 
-step secs gstate = return gstate {
-  inputState = updateInputState (inputState gstate),
-  menuState  = updateMenuState (inputState gstate) (menuState gstate),
-  levelState = updateLevelState secs (inputState gstate) (levelState gstate)
-}
+step secs gstate =
+  let 
+      updatedGStateGstate = gstate {
+        inputState = updatedInputState,
+        menuState  = updatedMenuState,
+        levelState = updatedLevelState
+      }
+  in
+    handleCall call1 $ handleCall call2 $ handleCall call3 (return updatedGStateGstate)
+  where
+    (Caller updatedInputState call1) = updateInputState (inputState gstate)
+    (Caller updatedMenuState call2) = updateMenuState (inputState gstate) (menuState gstate)
+    (Caller updatedLevelState call3) = updateLevelState secs (inputState gstate) (levelState gstate)
+
+handleCall :: Maybe Call -> IO GameState -> IO GameState
+handleCall Nothing gs = gs
+handleCall (Just call) gs = 
+  case call of
+    QuitGame -> exitWith ExitSuccess
+    otherwise -> gs
 
 --temporary, for starting with a loaded level
 

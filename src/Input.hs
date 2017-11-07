@@ -2,16 +2,23 @@ module Input where
 
 import InputModel
 import Graphics.Gloss.Interface.IO.Game
+import Model
 
 --Nullifies any presses. Basically only allowing for a key to be pressed one frame
-updateInputState :: InputState -> InputState
-updateInputState inputState = inputState {
-    keyLeftPress  = False,
-    keyRightPress = False,
-    keyPausePress = False,
-    keyEscPress   = False,
-    keyEnterPress = False
-}
+updateInputState :: InputState -> Caller InputState
+updateInputState inputState = 
+    let 
+        call
+            | keyEscPress inputState = Just QuitGame
+            | otherwise              = Nothing
+        updatedInputState = inputState {
+            keyLeftPress  = False,
+            keyRightPress = False,
+            keyPausePress = False,
+            keyEscPress   = False,
+            keyEnterPress = False
+        }
+        in Caller updatedInputState call
 
 inputKey :: Event -> InputState -> InputState
 inputKey (EventKey (SpecialKey c) d _ _) istate

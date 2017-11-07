@@ -8,9 +8,19 @@ import MenuModel
 import LevelModel
 
 data GameState = GameState {
-    inputState :: InputState                     
+    inputState :: InputState                  
   , menuState :: MenuState
   , levelState :: LevelState
+}
+
+data Caller a = Caller a (Maybe Call) --The caller and the call
+
+data Call = StartLevel LevelOptions | ShowMenu | QuitGame
+
+data LevelOptions = LevelOptions {
+    randomOrLoad :: Either Int String, --int is the seed, string the path
+    twoPlayers :: Bool,
+    ai         :: Bool
 }
 
 initialState :: GameState

@@ -6,29 +6,35 @@ import GameLogic
 
 import LevelModel
 import InputModel
+import Model
     
 initializeLevelState :: [FallingRegion] -> LevelState
 initializeLevelState fr = initialLevelState {fallingRegions = fr}
 
-updateLevelState :: Float -> InputState -> LevelState -> LevelState
-updateLevelState secs input lvlState 
-    | paused lvlState  = lvlState {
-        paused         = not $ keyPausePress input         
-    }
-    | hit lvlState     = lvlState {
-        player         = updateDeathPlayer (player lvlState),
-        fallingRegions = newRegions
-    }
-    | otherwise        = lvlState {
-        paused         = keyPausePress input, 
-        hit            = (hit lvlState ) || isHit (player lvlState) newRegions, 
-        player         = newPlayer,
-        fallingRegions = newRegions,
-        elapsedTime    = elapsedTime lvlState + secs ,
-        score          = score lvlState + secs
-    }
-  where newRegions = updateRegionsTick secs (fallingRegions lvlState)
-        newPlayer  = movePlayer (player lvlState) input (newRegions)                 
+updateLevelState :: Float -> InputState -> LevelState -> Caller LevelState
+updateLevelState secs input lvlState =
+    let 
+        updatedGameState
+            | paused lvlState  = lvlState {
+                paused         = not $ keyPausePress input         
+            }
+            | hit lvlState     = lvlState {
+                player         = updateDeathPlayer (player lvlState),
+                fallingRegions = newRegions
+            }
+            | otherwise        = lvlState {
+                paused         = keyPausePress input, 
+                hit            = (hit lvlState ) || isHit (player lvlState) newRegions, 
+                player         = newPlayer,
+                fallingRegions = newRegions,
+                elapsedTime    = elapsedTime lvlState + secs ,
+                score          = score lvlState + secs
+            }
+    in
+        Caller updatedGameState Nothing
+    where 
+        newRegions = updateRegionsTick secs (fallingRegions lvlState)
+        newPlayer  = movePlayer (player lvlState) input (newRegions)                     
 
 -- Functions to modify the level
 
