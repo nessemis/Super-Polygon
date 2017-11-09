@@ -7,6 +7,8 @@ import GameLogic
 import LevelModel
 import InputModel
 import Model
+
+import Graphics.Gloss.Data.Color
     
 initializeLevelState :: [FallingRegion] -> LevelState
 initializeLevelState fr = initialLevelState {fallingRegions = fr}
@@ -57,8 +59,20 @@ lineToFallingRegion ::  String -> FallingRegion
 lineToFallingRegion s = map textShapeToFallingShape (splitOn' (==',') s) 
                         
 textShapeToFallingShape :: String ->  FallingShape
-textShapeToFallingShape s = FallingShape (read $ head numbers) (read $ head $ tail numbers)
+textShapeToFallingShape s = FallingShape (read $ head numbers) 
+                                         (read $ head $ tail numbers) 
+                                         (toColor (read $ head $ tail $ tail numbers))
                         where numbers = splitOn' (==' ') s
+
+toColor :: Int -> Color
+toColor 0 = makeColor 1 0 0 1 --RED
+toColor 1 = makeColor 1 1 0 1 --YELLOW
+toColor 3 = makeColor 1 0 1 1 --PINK
+toColor 4 = makeColor 0 1 1 1 --BLUEGREEN
+toColor 5 = makeColor 0 1 0 1 --GREEN
+toColor 6 = makeColor 0 0 1 1 --BLUE
+toColor _ = makeColor 1 1 1 1 --White
+
 
 --https://stackoverflow.com/questions/4978578/how-to-split-a-string-in-haskell
 splitOn'     :: (Char -> Bool) -> String -> [String]

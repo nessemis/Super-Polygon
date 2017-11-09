@@ -7,14 +7,17 @@ import Model
 --at the moment, menu doesn't do anything
 updateMenuState :: InputState -> MenuState -> Caller MenuState
 updateMenuState is menuState    
-                                | keyRightPress is = Caller menuState {selectedButton = (selectedButton menuState) + 1} Nothing 
-                                | keyLeftPress  is = Caller menuState {selectedButton = (selectedButton menuState) - 1} Nothing 
-                                
-                                | keyEnterPress is = Caller menuState $ Just (StartLevel (LevelOptions (Right "lvl.txt") undefined undefined))
-                                | otherwise        = Caller menuState {displacement =  if (((displacement menuState)*100) == (fromIntegral (selectedButton menuState))) then (displacement menuState) else 
-                                                                                       (if (((displacement menuState) * 100 ) < (fromIntegral (selectedButton menuState)) )
-                                                                                       then ((displacement menuState) + 0.001) 
-                                                                                       else ((displacement menuState) - 0.001)) } Nothing 
-                                                                                       
+                                | keyRightPress is = Caller menuState {selectedButton = if ((sel + 1) < 5) then sel + 1 else sel} Nothing 
+                                | keyLeftPress  is = Caller menuState {selectedButton = if ((sel - 1) >= 0) then sel - 1 else sel} Nothing         
+                                | keyEnterPress is = Caller menuState {visible = False} $ Just (StartLevel (LevelOptions (Right ("lvl" ++ (show sel) ++ ".txt" )) undefined undefined))
+                                | otherwise        = Caller (updateDisplacement menuState) Nothing
+                                                 where sel = selectedButton menuState         
 
-                                
+
+
+                                                 
+updateDisplacement :: MenuState -> MenuState
+updateDisplacement ms = ms{displacement = dis + (if abs(dif) <= 0.01 then 0 else (dif / abs(dif) ) / 100)}
+                                    where sel' = fromIntegral (selectedButton ms)
+                                          dis  = displacement ms
+                                          dif  = (sel' - dis)

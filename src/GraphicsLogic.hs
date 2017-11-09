@@ -12,10 +12,12 @@ import System.Random
 
 
 menuPicture :: MenuState -> Picture
-menuPicture (MenuState False 0 0) = Blank
-menuPicture (MenuState True _ displacement) = Translate (displacement*2000) 0 $ pictures [menuButton "level 1" 0,
-                                                                                   menuButton "level 2" 50
-                                                                                  ]             
+menuPicture (MenuState False _ _) = Blank
+menuPicture (MenuState True _ displacement) = Translate (displacement * (-50)) 0 $ 
+                                                                    pictures [menuButton ("Level 1") 0,
+                                                                              menuButton "Level 2" 50,
+                                                                              menuButton "Level 3" 100
+                                                                             ]             
 
 menuButton :: String -> Float -> Picture
 menuButton name pos =  Translate pos 0 $ scale 20 20 $ pictures [
@@ -49,8 +51,8 @@ scorePicture ls = Translate 20 15   $
 
 fallingRegionsPicture :: LevelState -> Picture
 fallingRegionsPicture ls = pictures [regionPicture t n (fallingRegions ls !! n)| n <- [0 .. (t - 1)] ]
-        where t = length (fallingRegions ls)
-
+        where t     = length (fallingRegions ls)
+             
 -------------------------------------------------------
 --CENTER POLYGON---------------------------------------
 -------------------------------------------------------
@@ -109,17 +111,15 @@ playerPosition ls = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color b
 --REGION SHAPE------------------------------------------
 --------------------------------------------------------
 
-regionPicture :: Int -> Int -> FallingRegion -> Picture
-regionPicture t n r = rotate (360 * (fromIntegral (n + 1)) / (fromIntegral t)) $ pictures (map (squarePicture t) r)
+regionPicture ::  Int -> Int -> FallingRegion -> Picture
+regionPicture t n r = rotate (360 * (fromIntegral (n + 1)) / (fromIntegral t)) $ pictures (map (squarePicture  t) r)
 
 --------------------------------------------------------
 
 squarePicture :: Int -> FallingShape -> Picture
-squarePicture t (FallingShape d h) | (d < drawingDistance) = squareColor d h t
-                                   | otherwise = Blank
+squarePicture  t (FallingShape d h c) | (d < drawingDistance) = Color c $ squareEdges  d h t
+                                         | otherwise = Blank
                                    
-squareColor :: Float -> Float -> Int -> Picture
-squareColor d h t = color red (squareEdges d h t)
 
 squareEdges :: Float -> Float -> Int -> Picture
 squareEdges d h t = polygon [(d, 0), (d + h, 0), ((d + h) * cos(angle), (d + h) * sin(angle)), (d * cos(angle), d * sin(angle))]

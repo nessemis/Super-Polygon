@@ -12,9 +12,9 @@ updateFallingRegion elapsedTime region = map (updateFallingShape elapsedTime) re
 
 updateFallingShape :: Float -> FallingShape -> FallingShape
 updateFallingShape elapsedTime shape = case shape of
-  FallingShape 0 x -> FallingShape 0 (if(translation <= 0) then 0 else translation)
+  FallingShape 0 x c -> FallingShape 0 (if(translation <= 0) then 0 else translation) c
             where translation = (x - fallspeed * elapsedTime)
-  FallingShape d x -> FallingShape (if(translation <= 0) then 0 else translation) x
+  FallingShape d x c -> FallingShape (if(translation <= 0) then 0 else translation) x c
             where translation = (d - (fallspeed * elapsedTime) )
                   
                   
@@ -44,6 +44,6 @@ modP f i
 isHit :: Player -> [FallingRegion] -> Bool
 isHit (Player p aq) newRegions = or $ map shapeHitPlayer regionMap
   where 
-       shapeHitPlayer (FallingShape h s) = (h <= 3 && h + s >= 3)
-       regionMap                         = currentRegion newRegions --Checks if any of the current regions hit the player.
-       currentRegion r                   = r !! (floor p)           --Obtains the region in which the player is from both new and old regions.
+       shapeHitPlayer (FallingShape h s _) = (h <= 3 && h + s >= 3)
+       regionMap                           = currentRegion newRegions --Checks if any of the current regions hit the player.
+       currentRegion r                     = r !! (floor p)           --Obtains the region in which the player is from both new and old regions.
