@@ -36,6 +36,13 @@ updateLevelState secs input lvlState =
         newRegions = updateRegionsTick secs (fallingRegions lvlState)
         newPlayer  = movePlayer (player lvlState) input (newRegions)                     
 
+startLevel :: LevelOptions -> IO LevelState
+startLevel options = do
+                        x <- case (randomOrLoad options) of
+                                Right path -> readLevelFile path
+                                Left int -> undefined
+                        return $ initializeLevelState x
+        
 -- Functions to modify the level
 
 

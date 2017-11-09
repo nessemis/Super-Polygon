@@ -19,5 +19,6 @@ viewPure gstate = scale 20 20 $ pictures [(scorePicture lState),
                                           (centerPicture lState),            --Center polygon
                                           (playerPosition lState),
                                           (fallingRegionsPicture lState),    --FallingRegions
-                                          (playerPicture lState)]             --Player
+                                          (playerPicture lState),
+                                          (menuPicture (menuState gstate))]             --Player
     where lState = levelState gstate

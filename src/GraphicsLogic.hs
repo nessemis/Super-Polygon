@@ -1,13 +1,30 @@
-module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture,scorePicture) where
+module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture,scorePicture,menuPicture) where
 
 import Model
 import LevelModel
+import MenuModel
 
 import Prelude
 
 import Graphics.Gloss
 import Data.Fixed
 import System.Random
+
+
+menuPicture :: MenuState -> Picture
+menuPicture (MenuState False 0 0) = Blank
+menuPicture (MenuState True _ displacement) = Translate (displacement*2000) 0 $ pictures [menuButton "level 1" 0,
+                                                                                   menuButton "level 2" 50
+                                                                                  ]             
+
+menuButton :: String -> Float -> Picture
+menuButton name pos =  Translate pos 0 $ scale 20 20 $ pictures [
+                                            rotate 45 $ color white $ regularNPolygon 4,
+                                            rotate 45 $ color blue$ regularNLine 4,
+                                            scale 0.001 0.001 $ color blue  $ Text name
+                                            ]
+
+
 
 -------------------------------------------------------
 --SCORE------------------------------------------------
@@ -114,4 +131,8 @@ squareEdges d h t = polygon [(d, 0), (d + h, 0), ((d + h) * cos(angle), (d + h) 
 
 regularNPolygon :: Int -> Picture
 regularNPolygon t = polygon [(cos (x * stepSize), sin (x * stepSize)) | a <- [0 .. (t - 1)], let x = fromIntegral a]
+    where stepSize = 2 * pi / (fromIntegral t)
+    
+regularNLine :: Int -> Picture
+regularNLine t = line [(cos (x * stepSize), sin (x * stepSize)) | a <- [0 .. (t)], let x = fromIntegral a]
     where stepSize = 2 * pi / (fromIntegral t)

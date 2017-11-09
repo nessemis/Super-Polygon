@@ -65,6 +65,10 @@ handleCall :: Maybe Call -> IO GameState -> IO GameState
 handleCall Nothing gs = gs
 handleCall (Just call) gs = 
   case call of
+    StartLevel options -> do
+                            ls <- startLevel options
+                            gss <- gs
+                            return $ gss {levelState = ls}
     QuitGame -> exitWith ExitSuccess
     otherwise -> gs
 

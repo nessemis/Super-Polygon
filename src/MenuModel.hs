@@ -1,8 +1,12 @@
 module MenuModel where
     
 data MenuState = MenuState {
-visible    :: Bool
+visible         :: Bool,
+selectedButton  :: Int,
+displacement    :: Float
 }
 
+
+
 initialMenuState :: MenuState
-initialMenuState = MenuState True
+initialMenuState = MenuState True 0 0
