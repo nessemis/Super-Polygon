@@ -69,7 +69,11 @@ handleCall (Just call) gs =
                             ls <- startLevel options
                             gss <- gs
                             return $ gss {levelState = ls}
-    QuitGame -> exitWith ExitSuccess
+    QuitGame -> do
+                  gss <- gs
+                  case visible((menuState )gss ) of
+                    True -> exitWith ExitSuccess
+                    False-> return gss{menuState = (menuState gss){ visible = True } }
     otherwise -> gs
 
 --temporary, for starting with a loaded level

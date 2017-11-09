@@ -15,15 +15,15 @@ menuPicture :: MenuState -> Picture
 menuPicture (MenuState False _ _) = Blank
 menuPicture (MenuState True _ displacement) = Translate (displacement * (-50)) 0 $ 
                                                                     pictures [menuButton ("Level 1") 0,
-                                                                              menuButton "Level 2" 50,
-                                                                              menuButton "Level 3" 100
+                                                                              menuButton  "Level 2" 50,
+                                                                              menuButton  "Level 3" 100
                                                                              ]             
 
 menuButton :: String -> Float -> Picture
 menuButton name pos =  Translate pos 0 $ scale 20 20 $ pictures [
-                                            rotate 45 $ color white $ regularNPolygon 4,
+                                            rotate 45 $ Color (makeColor 0.6 0.6 0.6 1) $ regularNPolygon 4,
                                             rotate 45 $ color blue$ regularNLine 4,
-                                            scale 0.001 0.001 $ color blue  $ Text name
+                                            Translate ((-0.025)*fromIntegral(length name)) 0 $ scale 0.001 0.001 $ color blue  $ Text name
                                             ]
 
 
@@ -102,6 +102,7 @@ getPos (Player p a) = p
 getAnimTime :: Player -> Float
 getAnimTime (Player _ aq) = aq
 
+--OLD DEBUG FUNCTION
 playerPosition :: LevelState -> Picture
 playerPosition ls = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (getPos (player ls)),
                     Translate (-200) 0 $ Color yellow $ Text $ show $ fromIntegral $ length (fallingRegions ls)] 
