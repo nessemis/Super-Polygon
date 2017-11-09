@@ -1,4 +1,6 @@
 module LevelModel where
+
+import Graphics.Gloss.Data.Color
     
 fallspeed :: Float
 fallspeed = 1
@@ -15,10 +17,10 @@ data Player = Player {
                 
 data PlayerMovement = Idle | MoveLeft | MoveRight
 
-data FallingShape  = FallingShape Float Float --(Distance bottom to floor) Height 
+data FallingShape  = FallingShape Float Float Color--(Distance bottom to floor) Height 
 
 extractHeight :: FallingShape -> Float
-extractHeight fr@(FallingShape a _) = a
+extractHeight fr@(FallingShape a _ _) = a
 
 type FallingRegion = [FallingShape]
 
@@ -29,7 +31,8 @@ data LevelState = LevelState{
   , fallingRegions :: [FallingRegion]
   , elapsedTime    :: Float
   , score          :: Float
+  , speed          :: Float
 }
 
 initialLevelState :: LevelState
-initialLevelState = LevelState False (Player False 0 0 False) Nothing [] 0 0
+initialLevelState = LevelState False (Player False 0 0 False) Nothing [] 0 0 0
