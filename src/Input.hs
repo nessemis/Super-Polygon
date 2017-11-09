@@ -36,6 +36,8 @@ inputKey (EventKey (SpecialKey c) d _ _) istate
 --Check for normal keys
 inputKey (EventKey (Char c) d _ _) istate
    = case c of
+        'a' -> istate {keyA            = down}
+        'd' -> istate {keyD            = down}
         'p' -> istate {keyPause        = down,
                        keyPausePress   = down}
         _   -> istate 

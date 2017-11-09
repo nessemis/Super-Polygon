@@ -4,6 +4,8 @@ data InputState = InputState {
     keyPause :: Bool
     , keyLeft       :: Bool
     , keyRight      :: Bool
+    , keyA          :: Bool
+    , keyD          :: Bool
     , keyPausePress :: Bool    
     , keyLeftPress  :: Bool
     , keyRightPress :: Bool
@@ -12,4 +14,4 @@ data InputState = InputState {
 }
 
 initialInputState :: InputState
-initialInputState = InputState False False False False False False False False
+initialInputState = InputState False False False False False False False False False False

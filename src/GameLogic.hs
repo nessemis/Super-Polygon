@@ -1,8 +1,11 @@
-module GameLogic (updateRegionsTick, isHit, movePlayer, updateDeathPlayer) where
+module GameLogic (updateRegionsTick, isHit, movePlayer, updateDeathPlayer, modP) where
   
 import LevelModel
 import InputModel
 import Data.Fixed
+
+dx :: Float
+dx = 0.1
 
 updateRegionsTick :: Float -> [FallingRegion] -> [FallingRegion]
 updateRegionsTick elapsedTime regions = map (updateFallingRegion elapsedTime) regions
@@ -18,20 +21,19 @@ updateFallingShape elapsedTime shape = case shape of
             where translation = (d - (fallspeed * elapsedTime) )
                   
                   
-movePlayer :: Player -> InputState -> [FallingRegion] -> Player
-movePlayer p is regions = if bp `isHit` regions then p else bp 
-    where bp = moveBoundlessPlayer p is $ length regions
+movePlayer :: Player -> PlayerMovement -> [FallingRegion] -> Float
+movePlayer p pm regions = if bp `isHit` regions then location p else location bp 
+    where bp = moveBoundlessPlayer p pm $ length regions
 
 --Update player animation and register pause
 updateDeathPlayer :: Player -> Player
-updateDeathPlayer (Player p aq) = Player p (aq+1)
+updateDeathPlayer p = p {deathAnimation = deathAnimation p + 1}
 
-moveBoundlessPlayer :: Player -> InputState -> Int ->  Player
-moveBoundlessPlayer (Player p aq) InputState{keyLeft = a, keyRight = b} regionamount
-    | a         = Player ((p - d) `modP` regionamount) aq  
-    | b         = Player ((p + d) `modP` regionamount) aq
-    | otherwise = Player p aq
-        where d = 0.1
+moveBoundlessPlayer :: Player -> PlayerMovement -> Int ->  Player
+moveBoundlessPlayer player@(Player {location = p}) pm regionamount = case pm of
+    MoveLeft  -> player {location = (p - dx) `modP` regionamount }
+    MoveRight -> player {location = (p + dx) `modP` regionamount }
+    otherwise -> player
               
     
     
@@ -42,8 +44,8 @@ modP f i
     where fi = fromIntegral i
     
 isHit :: Player -> [FallingRegion] -> Bool
-isHit (Player p aq) newRegions = or $ map shapeHitPlayer regionMap
+isHit p newRegions = or $ map shapeHitPlayer regionMap
   where 
        shapeHitPlayer (FallingShape h s) = (h <= 3 && h + s >= 3)
        regionMap                         = currentRegion newRegions --Checks if any of the current regions hit the player.
-       currentRegion r                   = r !! (floor p)           --Obtains the region in which the player is from both new and old regions.
+       currentRegion r                   = r !! (floor (location p))           --Obtains the region in which the player is from both new and old regions.

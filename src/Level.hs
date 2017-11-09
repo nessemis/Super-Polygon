@@ -1,5 +1,6 @@
 module Level where
     
+import Data.Maybe
 import Control.Monad
 import Control.Monad.IO.Class
 import GameLogic
@@ -18,23 +19,70 @@ updateLevelState secs input lvlState =
             | paused lvlState  = lvlState {
                 paused         = not $ keyPausePress input         
             }
-            | hit lvlState     = lvlState {
-                player         = updateDeathPlayer (player lvlState),
+            | hit p1 = lvlState {
+                player         = updateDeathPlayer p1,
+                fallingRegions = newRegions
+            }
+            | isJust p2 && hit jp2 = lvlState {
+                player2        = Just (updateDeathPlayer jp2),
                 fallingRegions = newRegions
             }
             | otherwise        = lvlState {
                 paused         = keyPausePress input, 
-                hit            = (hit lvlState ) || isHit (player lvlState) newRegions, 
-                player         = newPlayer,
+                player         = p1 { hit = hit p1 || isHit p1 newRegions,
+                                      location = newPlayerLocation},
                 fallingRegions = newRegions,
                 elapsedTime    = elapsedTime lvlState + secs ,
-                score          = score lvlState + secs
+                score          = score lvlState + secs,
+                player2        = if isJust p2 then 
+                    Just jp2{ hit      = hit jp2 || isHit jp2 newRegions,
+                         location = newPlayer2Location}
+                    else p2
+
             }
     in
         Caller updatedGameState Nothing
-    where 
+    where
+        p1         = player lvlState
+        p2         = player2 lvlState
+        jp2        = fromJust p2
         newRegions = updateRegionsTick secs (fallingRegions lvlState)
-        newPlayer  = movePlayer (player lvlState) input (newRegions)                     
+        newPlayerLocation  = movePlayer p1 (inputToMovement input) newRegions
+        newPlayer2Location = case p2 of
+            Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovement2 input) newRegions
+            Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lvlState) newRegions
+
+inputToMovement :: InputState -> PlayerMovement
+inputToMovement is 
+                | keyLeft is  = MoveLeft
+                | keyRight is = MoveRight
+                | otherwise   = Idle
+
+inputToMovement2 :: InputState -> PlayerMovement
+inputToMovement2 is 
+                | keyA is  = MoveLeft
+                | keyD is = MoveRight
+                | otherwise   = Idle
+
+movementAi :: LevelState -> PlayerMovement
+movementAi lvlState = closestRegionLocation (fromJust (player2 lvlState)) (fallingRegions lvlState)
+
+closestRegionLocation :: Player -> [FallingRegion] -> PlayerMovement
+closestRegionLocation p r 
+    | abs distance <= 0.2                                           = Idle
+    | distance >= 0 && distance <= ((fromIntegral regionCount) / 2) = MoveRight
+    | distance >= 0 && distance >= ((fromIntegral regionCount) / 2) = MoveLeft
+    | distance <= 0 && distance <= ((fromIntegral regionCount) / 2) = MoveRight
+    | distance <= 0 && distance >= ((fromIntegral regionCount) / 2) = MoveLeft
+    where closestRegionLocation = (extractHeight (head (findLowest (filter ((<=) 3 . extractHeight) (map head r)))) + 0.5) `modP` regionCount
+          regionCount           = (length r)
+          distance              = closestRegionLocation - location p
+          
+findLowest :: [FallingShape] -> [FallingShape]
+findLowest [x]    = [x]
+findLowest (x:xs) = let y = head xs in
+                        if extractHeight x < extractHeight y
+                            then findLowest $ x:(tail xs) else findLowest xs
 
 startLevel :: LevelOptions -> IO LevelState
 startLevel options = do

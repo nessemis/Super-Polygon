@@ -69,36 +69,36 @@ centerEdges = regularNPolygon . length . fallingRegions
 -------------------------------------------------------
 --THE PLAYER-------------------------------------------
 -------------------------------------------------------
-playerPicture :: LevelState -> Picture
-playerPicture ls | (hit ls)  = rot ( trans ( playerColor ( playerDeathEdges) ls))
-                 | otherwise = rot (trans (playerColor (playerEdges) ls))
-        where total = fromIntegral $ length $ fallingRegions ls
+playerPicture :: Player -> Int -> Picture --The int is the amount of fallingregions
+playerPicture p r | (hit p)  = rot ( trans ( playerColor ( playerDeathEdges) p))
+                  | otherwise = rot (trans (playerColor (playerEdges) p))
+        where total = fromIntegral $ r
               trans = translate 2.0 0.0 
-              rot   = rotate (360.0 * (getPos(player ls)) / total)
+              rot   = rotate (360.0 * (getPos p) / total)
               
               
-playerColor :: (LevelState -> Picture) -> LevelState -> Picture
+playerColor :: (Player -> Picture) -> Player -> Picture
 --playerColor f ls = if (keyEnter (inputState ls))  then ( color white . f) ls else ( color green . f) ls
-playerColor f ls = (color white . f) ls
+playerColor f p = (color white . f) p
 
 
-playerDeathEdges :: LevelState -> Picture
-playerDeathEdges ls = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
-                                                        | let x = (getAnimTime (player ls))/30,
+playerDeathEdges :: Player -> Picture
+playerDeathEdges p = pictures [ (rotate y $ scale (0.25 /z) (0.25/z) $ Translate ( x) (  x) $ (regularNPolygon 3)) 
+                                                        | let x = (getAnimTime p)/30,
                                                           let z =(x/10+1) ,
                                                           ey<-[1..12],
                                                           let y = (ey*30)]
 
                                                          
-playerEdges :: LevelState -> Picture
+playerEdges :: Player -> Picture
 playerEdges = const (regularNPolygon 3)
 
 --Helper Function to get the player position
 getPos :: Player -> Float
-getPos (Player p a) = p
+getPos p = location p
 --Helper function to get the player animation time
 getAnimTime :: Player -> Float
-getAnimTime (Player _ aq) = aq
+getAnimTime p = deathAnimation p
 
 playerPosition :: LevelState -> Picture
 playerPosition ls = Translate (2) (2) $ scale (0.02) (0.02) $ pictures [ Color blue $ Text $ show (getPos (player ls)),
