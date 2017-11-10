@@ -18,7 +18,7 @@ view = return . viewPure
 viewPure :: GameState -> Picture
 viewPure gstate = scale 20 20 $ pictures [(centerPicture lState),            --Center polygon
                                           (fallingRegionsPicture lState),    --FallingRegions
-                                          (playerPicture (player lState) (length $ fallingRegions lState)),
+                                          (playerPictures (player lState) (player2 lState) (length $ fallingRegions lState)),
                                           (scorePicture lState),
                                           (menuPicture (menuState gstate))]             --Player
     where lState = levelState gstate

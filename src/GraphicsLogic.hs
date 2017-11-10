@@ -1,4 +1,4 @@
-module GraphicsLogic (centerPicture, playerPicture, playerPosition,fallingRegionsPicture,scorePicture,menuPicture) where
+module GraphicsLogic (centerPicture, playerPictures, playerPosition,fallingRegionsPicture,scorePicture,menuPicture) where
 
 import Model
 import LevelModel
@@ -67,6 +67,19 @@ centerColor = color red . centerEdges
 
 centerEdges :: LevelState -> Picture
 centerEdges = regularNPolygon . length . fallingRegions
+
+
+-------------------------------------------------------
+--THE PLAYERS------------------------------------------
+-------------------------------------------------------
+
+playerPictures :: Player -> Maybe Player -> Int -> Picture
+playerPictures p1 p2 r = case p2 of
+    Nothing  -> p1Picture
+    Just jp2 -> let p2Picture = playerPicture jp2 r in
+                pictures [p1Picture, p2Picture]
+    where p1Picture = playerPicture p1 r
+          
 
 -------------------------------------------------------
 --THE PLAYER-------------------------------------------
