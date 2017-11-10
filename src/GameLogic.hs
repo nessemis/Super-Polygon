@@ -5,7 +5,7 @@ import InputModel
 import Data.Fixed
 
 dx :: Float
-dx = 0.1
+dx = 0.09
 
 updateRegionsTick :: Float -> Float -> [FallingRegion] -> [FallingRegion]
 updateRegionsTick speed elapsedTime regions = map (updateFallingRegion speed elapsedTime) regions

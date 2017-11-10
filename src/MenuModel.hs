@@ -1,12 +1,22 @@
 module MenuModel where
     
 data MenuState = MenuState {
-visible         :: Bool,
-selectedButton  :: Int,
-displacement    :: Float
+    visible         :: Bool,
+    screen          :: Screen
 }
 
+data Screen = 
+    LevelSelect {
+        selectedButton  :: Int,
+        displacement    :: Float        
+    }
+    | EndGameMessage String
 
+initialScreen :: Screen
+initialScreen = LevelSelect 0 0
 
 initialMenuState :: MenuState
-initialMenuState = MenuState True 0 0
+initialMenuState = MenuState True initialScreen
+
+endGameMenuState :: String -> MenuState
+endGameMenuState = MenuState True . EndGameMessage

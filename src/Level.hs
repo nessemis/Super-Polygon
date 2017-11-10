@@ -43,7 +43,7 @@ updateLevelState secs input lvlState =
 
             }
     in
-        Caller updatedGameState Nothing
+        Caller updatedGameState (getCall updatedGameState)
     where
         p1         = player lvlState
         p2         = player2 lvlState
@@ -55,6 +55,17 @@ updateLevelState secs input lvlState =
         newPlayer2Location = case p2 of
             Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovement2 input) newRegions
             Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lvlState jp2) newRegions
+
+getCall :: LevelState -> Maybe Call
+getCall ls
+    | paused ls                                               = Nothing
+    | elapsedTime ls >= 20 && (not (paused ls))               = Just (EndGame "YOU WON!")
+    | isJust (player2 ls) && hit (fromJust (player2 ls)) && hit (player ls) = Just (EndGame "You both lost!")        
+    | hit (player ls) && not (isJust (player2 ls))            = Just (EndGame "YOU LOST")
+    | hit (player ls) && isJust (player2 ls)                  = Just (EndGame "Player 1 Won!")
+    | isJust (player2 ls) && hit (fromJust (player2 ls))      = Just (EndGame "Player 2 Won!")    
+    | hit (player ls) && not (isJust (player2 ls))            = Just (EndGame "YOU LOST")    
+    | otherwise                                               = Nothing
 
 inputToMovement :: InputState -> PlayerMovement
 inputToMovement is 
