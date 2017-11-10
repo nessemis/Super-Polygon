@@ -7,18 +7,18 @@ import Data.Fixed
 dx :: Float
 dx = 0.1
 
-updateRegionsTick :: Float -> [FallingRegion] -> [FallingRegion]
-updateRegionsTick elapsedTime regions = map (updateFallingRegion elapsedTime) regions
+updateRegionsTick :: Float -> Float -> [FallingRegion] -> [FallingRegion]
+updateRegionsTick speed elapsedTime regions = map (updateFallingRegion speed elapsedTime) regions
 
-updateFallingRegion :: Float -> FallingRegion -> FallingRegion
-updateFallingRegion elapsedTime region = map (updateFallingShape elapsedTime) region
+updateFallingRegion :: Float -> Float -> FallingRegion -> FallingRegion
+updateFallingRegion speed elapsedTime region = map (updateFallingShape speed elapsedTime) region
 
-updateFallingShape :: Float -> FallingShape -> FallingShape
-updateFallingShape elapsedTime shape = case shape of
+updateFallingShape :: Float ->  Float -> FallingShape -> FallingShape
+updateFallingShape speed elapsedTime shape = case shape of
   FallingShape 0 x c -> FallingShape 0 (if(translation <= 0) then 0 else translation) c
-            where translation = (x - fallspeed * elapsedTime)
+            where translation = (x - speed * elapsedTime)
   FallingShape d x c -> FallingShape (if(translation <= 0) then 0 else translation) x c
-            where translation = (d - (fallspeed * elapsedTime) )
+            where translation = (d - (speed * elapsedTime) )
                   
                   
 movePlayer :: Player -> PlayerMovement -> [FallingRegion] -> Float

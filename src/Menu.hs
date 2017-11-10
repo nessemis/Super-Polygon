@@ -17,7 +17,7 @@ updateMenuState is menuState
 
                                                  
 updateDisplacement :: MenuState -> MenuState
-updateDisplacement ms = ms{displacement = dis + (if abs(dif) <= 0.01 then 0 else (dif / abs(dif) ) / 100)}
+updateDisplacement ms = ms{displacement = dis + (if abs(dif) <= 0.01 then 0 else (dif / abs(dif) ) / 25)}
                                     where sel' = fromIntegral (selectedButton ms)
                                           dis  = displacement ms
                                           dif  = (sel' - dis)

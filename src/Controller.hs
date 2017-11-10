@@ -78,7 +78,7 @@ handleCall (Just call) gs =
 
 --temporary, for starting with a loaded level
 
-initializedState :: [FallingRegion] -> GameState
+initializedState :: ([FallingRegion],Float) -> GameState
 initializedState fr = GameState initialInputState initialMenuState (initializeLevelState fr)
 
 ----------------------------------------------
