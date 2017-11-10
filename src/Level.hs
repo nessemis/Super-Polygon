@@ -11,8 +11,8 @@ import Model
 
 import Graphics.Gloss.Data.Color
     
-initializeLevelState :: [FallingRegion] -> LevelState
-initializeLevelState fr = initialLevelState {fallingRegions = fr}
+initializeLevelState :: ([FallingRegion],Float) -> LevelState
+initializeLevelState (fr,sp) = initialLevelState {fallingRegions = fr, speed = sp}
 
 updateLevelState :: Float -> InputState -> LevelState -> Caller LevelState
 updateLevelState secs input lvlState =
@@ -48,7 +48,7 @@ updateLevelState secs input lvlState =
         p1         = player lvlState
         p2         = player2 lvlState
         jp2        = fromJust p2
-        newRegions = updateRegionsTick secs (fallingRegions lvlState)
+        newRegions = updateRegionsTick (speed lvlState) secs (fallingRegions lvlState)
         newPlayerLocation  = case p1 of
             (Player _ _ _ False) -> movePlayer p1 (inputToMovement input) newRegions
             (Player _ _ _ True)  -> movePlayer p1 (movementAi lvlState p1) newRegions            
@@ -105,10 +105,10 @@ startLevel options = do
 
 -- IMPURE
 
-readLevelFile :: FilePath -> IO [FallingRegion]
+readLevelFile :: FilePath -> IO ([FallingRegion],Float)
 readLevelFile f = do
             fileContent <- readFile f
-            return (map lineToFallingRegion (lines fileContent))
+            return ((map lineToFallingRegion (tail(lines fileContent))), read $ head $ (lines fileContent) )
 
 lineToFallingRegion ::  String -> FallingRegion
 lineToFallingRegion s = map textShapeToFallingShape (splitOn' (==',') s) 
