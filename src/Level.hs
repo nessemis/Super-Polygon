@@ -49,10 +49,12 @@ updateLevelState secs input lvlState =
         p2         = player2 lvlState
         jp2        = fromJust p2
         newRegions = updateRegionsTick secs (fallingRegions lvlState)
-        newPlayerLocation  = movePlayer p1 (inputToMovement input) newRegions
+        newPlayerLocation  = case p1 of
+            (Player _ _ _ False) -> movePlayer p1 (inputToMovement input) newRegions
+            (Player _ _ _ True)  -> movePlayer p1 (movementAi lvlState p1) newRegions            
         newPlayer2Location = case p2 of
             Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovement2 input) newRegions
-            Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lvlState) newRegions
+            Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lvlState jp2) newRegions
 
 inputToMovement :: InputState -> PlayerMovement
 inputToMovement is 
@@ -66,25 +68,30 @@ inputToMovement2 is
                 | keyD is = MoveRight
                 | otherwise   = Idle
 
-movementAi :: LevelState -> PlayerMovement
-movementAi lvlState = closestRegionLocation (fromJust (player2 lvlState)) (fallingRegions lvlState)
+movementAi :: LevelState -> Player -> PlayerMovement
+movementAi lvlState p = closestRegionLocation p (fallingRegions lvlState)
 
 closestRegionLocation :: Player -> [FallingRegion] -> PlayerMovement
 closestRegionLocation p r 
-    | abs distance <= 0.2                                           = Idle
-    | distance >= 0 && distance <= ((fromIntegral regionCount) / 2) = MoveRight
-    | distance >= 0 && distance >= ((fromIntegral regionCount) / 2) = MoveLeft
-    | distance <= 0 && distance <= ((fromIntegral regionCount) / 2) = MoveRight
-    | distance <= 0 && distance >= ((fromIntegral regionCount) / 2) = MoveLeft
-    where closestRegionLocation = (extractHeight (head (findLowest (filter ((<=) 3 . extractHeight) (map head r)))) + 0.5) `modP` regionCount
-          regionCount           = (length r)
-          distance              = closestRegionLocation - location p
+    | abs direction <= 0.2 = Idle
+    | direction >= 0       = MoveRight
+    | direction <= 0       = MoveLeft
+    where preferredLocation = fromIntegral (fst (head (findHighest (zip [0..] (map firstCollidableRegion r))))) + 0.5
+          halfRegions       = (fromIntegral (length r)) / 2
+          distance          = preferredLocation - location p
+          direction         = if abs distance >= halfRegions then abs distance / distance * (-2) * halfRegions + distance else distance
           
-findLowest :: [FallingShape] -> [FallingShape]
-findLowest [x]    = [x]
-findLowest (x:xs) = let y = head xs in
-                        if extractHeight x < extractHeight y
-                            then findLowest $ x:(tail xs) else findLowest xs
+firstCollidableRegion :: [FallingShape] -> FallingShape
+firstCollidableRegion region  
+    | length region == 0               = FallingShape 100 1 (black)
+    | extractHeight (head region) <= 3 = firstCollidableRegion (tail region)
+    | otherwise                        = head region
+
+findHighest :: [(Int, FallingShape)] -> [(Int, FallingShape)]
+findHighest [x]    = [x]
+findHighest (x:xs) = let y = head xs in
+            if (extractHeight . snd) x > (extractHeight . snd) y
+                then findHighest $ x:(tail xs) else findHighest xs
 
 startLevel :: LevelOptions -> IO LevelState
 startLevel options = do
