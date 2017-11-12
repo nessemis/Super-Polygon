@@ -6,11 +6,13 @@ module Model where
 import InputModel
 import MenuModel
 import LevelModel
+import GraphicsModel
 
 data GameState = GameState {
     inputState :: InputState                  
   , menuState :: MenuState
   , levelState :: LevelState
+  , levelAnimation :: LevelAnimation
 }
 
 data Caller a = Caller a (Maybe Call) --The caller and the call

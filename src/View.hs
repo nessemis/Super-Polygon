@@ -12,8 +12,9 @@ view :: GameState -> IO Picture
 view = return . viewPure
 
 viewPure :: GameState -> Picture
-viewPure (GameState{ levelState = lState, menuState = mState}) = scale 20 20 $ pictures [centerPicture lState,             --Center polygon
-                                          fallingRegionsPicture lState,                                                    --FallingRegions
-                                          playerPictures (player lState) (player2 lState) (length $ fallingRegions lState),
-                                          scorePicture lState,
-                                          menuPicture mState]                                                               --Player
+viewPure (GameState{ levelState = lState, menuState = mState}) = scale 20 20 $ pictures [levelPicture,
+                                                                                         scorePicture lState,
+                                                                                         menuPicture mState]
+    where levelPicture = pictures [fallingRegionsPicture lState, --FallingRegions
+                                   centerPicture lState,         --Center polygon
+                                   playerPictures (player lState) (player2 lState) (length $ fallingRegions lState)]
