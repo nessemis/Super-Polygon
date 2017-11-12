@@ -16,7 +16,7 @@ menuPicture (MenuState False _) = Blank
 menuPicture (MenuState True (s@LevelSelect{displacement = displacement, buttons = buttonStrings})) = Translate (displacement * (-50)) 0 $ 
                                                                     pictures [menuButton buttonString (fromIntegral (50 * n)) | n <- [0..(length fullList - 1)], let buttonString = fullList !! n]
                                                                     where fullList = "RANDOM" : buttonStrings
-menuPicture (MenuState True s@(EndGameMessage m _)) = menuButton m 0
+menuPicture (MenuState True s@(EndGameMessage m _)) = menuSplash m 
 menuPicture (MenuState True s@(LevelOptionsSelect options _)) = menuButton (show (playOptions options)) 0
 
          
@@ -27,7 +27,12 @@ menuButton name pos =  Translate pos 0 $ scale 20 20 $ pictures [
                                             rotate 45 $ color blue$ regularNLine 4,
                                             Translate ((-0.025)*fromIntegral(length name)) 0 $ scale 0.001 0.001 $ color blue  $ Text name
                                             ]
-
+menuSplash :: String -> Picture
+menuSplash name = Translate (0) (10) $ scale 20 5 $ pictures [
+                                            rotate 45 $ Color (makeColor 0.2 0.2 0.2 1) $ regularNPolygon 4,
+                                            rotate 45 $ color blue$ regularNLine 4,
+                                            Translate ((-0.04)*fromIntegral(length name)) 0 $ scale 0.001 0.004 $ color red  $ Text name
+                                            ]
 
 -------------------------------------------------------
 --SCORE------------------------------------------------

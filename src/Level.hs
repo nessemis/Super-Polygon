@@ -22,6 +22,8 @@ updateLevelState secs input lvlState =
     let 
         updatedGameState
             | paused lvlState  = lvlState {
+                player         = updateDeathPlayer p1,
+               
                 paused         = not $ keyPausePress input         
             }
             | hit p1 = lvlState {
