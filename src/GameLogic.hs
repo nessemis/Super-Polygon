@@ -8,35 +8,33 @@ dx :: Float
 dx = 0.09
 
 updateRegionsTick :: Float -> Float -> [FallingRegion] -> [FallingRegion]
-updateRegionsTick speed elapsedTime regions = map (updateFallingRegion speed elapsedTime) regions
+updateRegionsTick speed elapsedTime fallingRegions = map (updateFallingRegion speed elapsedTime) fallingRegions
 
 updateFallingRegion :: Float -> Float -> FallingRegion -> FallingRegion
-updateFallingRegion speed elapsedTime region = map (updateFallingShape speed elapsedTime) region
+updateFallingRegion speed elapsedTime fallingRegions = map (updateFallingShape speed elapsedTime) fallingRegions
 
 updateFallingShape :: Float ->  Float -> FallingShape -> FallingShape
 updateFallingShape speed elapsedTime shape = case shape of
-  FallingShape 0 x c -> FallingShape 0 (if(translation <= 0) then 0 else translation) c
-            where translation = (x - speed * elapsedTime)
-  FallingShape d x c -> FallingShape (if(translation <= 0) then 0 else translation) x c
-            where translation = (d - (speed * elapsedTime) )
+  FallingShape 0 height color -> FallingShape 0 (if updatedHeight <= 0 then 0 else updatedHeight) color
+            where updatedHeight = (height - speed * elapsedTime)
+  FallingShape distance height color -> FallingShape (if updatedDistance <= 0 then 0 else updatedDistance) height color
+            where updatedDistance = (distance - (speed * elapsedTime) )
                   
                   
 movePlayer :: Player -> PlayerMovement -> [FallingRegion] -> Float
-movePlayer p pm regions = if bp `isHit` regions then location p else location bp 
-    where bp = moveBoundlessPlayer p pm $ length regions
+movePlayer player playerMovement fallingRegions = if updatedPlayer `isHit` fallingRegions then location player else location updatedPlayer 
+    where updatedPlayer = moveBoundlessPlayer player playerMovement $ length fallingRegions
 
 --Update player animation and register pause
 updateDeathPlayer :: Player -> Player
 updateDeathPlayer p = p {deathAnimation = deathAnimation p + 1}
 
 moveBoundlessPlayer :: Player -> PlayerMovement -> Int ->  Player
-moveBoundlessPlayer player@(Player {location = p}) pm regionamount = case pm of
-    MoveLeft  -> player {location = (p - dx) `modP` regionamount }
-    MoveRight -> player {location = (p + dx) `modP` regionamount }
+moveBoundlessPlayer player@(Player {location = location}) playerMovement regionamount = case playerMovement of
+    MoveLeft  -> player {location = (location - dx) `modP` regionamount }
+    MoveRight -> player {location = (location + dx) `modP` regionamount }
     otherwise -> player
               
-    
-    
 modP :: Float -> Int -> Float
 modP f i
   |f < 0     = mod' (f + fi) fi
@@ -44,8 +42,8 @@ modP f i
     where fi = fromIntegral i
     
 isHit :: Player -> [FallingRegion] -> Bool
-isHit p newRegions = or $ map shapeHitPlayer regionMap
+isHit player newRegions = or $ map shapeHitPlayer regionMap
   where 
-       shapeHitPlayer (FallingShape h s _) = (h <= 3 && h + s >= 3)
+       shapeHitPlayer (FallingShape distance height _) = distance <= 3 && distance + height >= 3
        regionMap                         = currentRegion newRegions --Checks if any of the current regions hit the player.
-       currentRegion r                   = r !! (floor (location p))           --Obtains the region in which the player is from both new and old regions.
+       currentRegion r                   = r !! (floor $ location player)           --Obtains the region in which the player is from both new and old regions.

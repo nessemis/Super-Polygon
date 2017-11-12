@@ -46,11 +46,9 @@ handleCall (Just call) gState@GameState{ menuState = mState, levelState = lState
                                return $ gState{ levelState = updatedLState, menuState = mState{visible = False}}
     EndGame message -> return $ gState { levelState = lState{paused = True}, menuState = endGameMenuState message . extractLevelSelectScreen . screen $ mState}
     ShowMenu   -> if visible (mState) then return gState else
-                    return gState{ menuState = mState{ visible = True }, levelState = lState{ paused = True} }
-    ResumeGame -> if not $ paused lState then return gState else
+                    return gState{ menuState = mState{ visible = True, screen = extractLevelSelectScreen (screen mState) }, levelState = lState{ paused = True} }
+    ResumeGame -> if not $ paused lState || isGameFinished lState then return gState else
                       return gState{ menuState = mState{ visible = False }, levelState = lState{ paused = False} }                      
-
---temporary, for starting with a loaded level
 
 getLevelPaths :: IO [String]
 getLevelPaths = do

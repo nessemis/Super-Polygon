@@ -19,19 +19,16 @@ initializeLevelState (fallingRegions, speed) = initialLevelState { fallingRegion
 
 updateLevelState :: Float -> InputState -> LevelState -> Caller LevelState
 updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elapsedTime score speed) =
-    let updatedGameState
-            | paused = lState {
-                player         = updateDeathPlayer p1,
-               
-                paused         = not $ keyPausePress input         
-            }
+    let updatedLState
             | hit p1 = lState {
-                player         = updateDeathPlayer p1,
-                fallingRegions = updatedFallingRegions
+                player         = updateDeathPlayer p1
             }
             | isJust p2 && hit jp2 = lState {
-                player2        = Just (updateDeathPlayer jp2),
-                fallingRegions = updatedFallingRegions
+                player2        = Just $ updateDeathPlayer jp2
+            }
+            | paused = lState{
+                player         = updateDeathPlayer p1,
+                paused         = not $ keyPausePress input         
             }
             | otherwise        = lState {
                 paused         = keyPausePress input, 
@@ -43,7 +40,7 @@ updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elaps
                 player2        = if isJust p2 then Just jp2{ hit = hit jp2 || isHit jp2 updatedFallingRegions, location = newPlayer2Location} else p2
             }
     in
-        Caller updatedGameState $ getCall updatedGameState input
+        Caller updatedLState $ getCall updatedLState input
     where
         jp2        = fromJust p2
         updatedFallingRegions = updateRegionsTick speed secs fallingRegions
@@ -54,17 +51,27 @@ updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elaps
             Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovementP2 input) updatedFallingRegions
             Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lState jp2) updatedFallingRegions
 
+isGameFinished :: LevelState -> Bool
+isGameFinished = isJust . getEndGameMessage
+
 getCall :: LevelState -> InputState -> Maybe Call
 getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _) iState
     | paused                                   = Nothing
+    | isJust endGameMessage                    = Just $ EndGame (fromJust endGameMessage)           
     | keyEscPress iState                       = Just ShowMenu
-    | elapsedTime >= 20 && not paused          = Just (EndGame "YOU WON!")
-    | isJust p2 && hit (fromJust p2) && hit p1 = Just (EndGame "You both lost!")        
-    | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")
-    | hit p1    && isJust p2                   = Just (EndGame "Player 1 Won!")
-    | isJust p2 && hit (fromJust p2)           = Just (EndGame "Player 2 Won!")    
-    | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")    
     | otherwise                                = Nothing
+    where endGameMessage = getEndGameMessage lState
+
+getEndGameMessage :: LevelState -> Maybe String
+getEndGameMessage (LevelState paused p1 p2 _ elapsedTime _ _)
+    | elapsedTime >= 20 && not paused          = Just "YOU WON!"
+    | isJust p2 && hit (fromJust p2) && hit p1 = Just "You both lost!"      
+    | hit p1    && not (isJust p2)             = Just "YOU LOST"
+    | hit p1    && isJust p2                   = Just "Player 2 Won!"
+    | isJust p2 && hit (fromJust p2)           = Just "Player 1 Won!" 
+    | hit p1    && not (isJust p2)             = Just "YOU LOST"
+    | otherwise                                = Nothing
+
 
 inputToMovement :: InputState -> PlayerMovement
 inputToMovement lState 
