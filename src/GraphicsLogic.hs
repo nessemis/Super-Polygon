@@ -84,9 +84,7 @@ squareEdges d h t = polygon [(d, 0), (d + h, 0), ((d + h) * cos(angle), (d + h) 
 -------------------------------------------------------
 --The center picture spins for nice effect
 centerPicture :: LevelState -> Picture
-centerPicture ls = (rotate timeStep . centerColor) ls
-    where 
-        timeStep = elapsedTime ls * 20
+centerPicture ls = centerColor ls
 
 centerColor :: LevelState -> Picture
 centerColor = color red . centerEdges

@@ -12,7 +12,7 @@ data GameState = GameState {
     inputState :: InputState                  
   , menuState :: MenuState
   , levelState :: LevelState
-  , levelAnimation :: LevelAnimation
+  , animationState :: AnimationState
 }
 
 data Caller a = Caller a (Maybe Call) --The caller and the call

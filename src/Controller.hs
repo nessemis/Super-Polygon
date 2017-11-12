@@ -23,19 +23,21 @@ import Level
 
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-step secs gState@GameState{ inputState = iState, menuState = mState, levelState = lState} =
+step secs gState@(GameState iState mState lState aState) =
   let 
       updatedGStateGstate = gState {
         inputState = updatedInputState,
         menuState  = updatedMenuState,
-        levelState = updatedLevelState
+        levelState = updatedLevelState,
+        animationState = updatedAnimationState
       }
   in
     return updatedGStateGstate >>= handleCall call1 >>= handleCall call2 >>= handleCall call3
   where
     (Caller updatedInputState call1) = updateInputState iState
-    (Caller updatedMenuState call2) = updateMenuState iState mState
+    (Caller updatedMenuState call2)  = updateMenuState iState mState
     (Caller updatedLevelState call3) = updateLevelState secs iState lState
+    updatedAnimationState            = updateLevelAnimation secs aState
 
 handleCall :: Maybe Call -> GameState -> IO GameState
 handleCall Nothing gState = return gState
