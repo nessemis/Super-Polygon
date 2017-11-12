@@ -15,13 +15,7 @@ data GameState = GameState {
 
 data Caller a = Caller a (Maybe Call) --The caller and the call
 
-data Call = StartLevel LevelOptions | ShowMenu | EndGame String | QuitGame
-
-data LevelOptions = LevelOptions {
-    randomOrLoad :: Either Int String, --int is the seed, string the path
-    twoPlayers :: Bool,
-    ai         :: Bool
-}
+data Call = StartLevel LevelOptions | ShowMenu | ResumeGame | EndGame String | QuitGame
 
 initialState :: GameState
 initialState = GameState initialInputState initialMenuState initialLevelState

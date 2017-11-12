@@ -11,7 +11,8 @@ data InputState = InputState {
     , keyRightPress :: Bool
     , keyEscPress   :: Bool
     , keyEnterPress :: Bool
+    , keyQPress     :: Bool
 }
 
 initialInputState :: InputState
-initialInputState = InputState False False False False False False False False False False
+initialInputState = InputState False False False False False False False False False False False

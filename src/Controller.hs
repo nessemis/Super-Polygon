@@ -21,32 +21,6 @@ import Level
 
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-{- step secs gstate 
-                 | (menu gstate) = 
-                          return $ gstate {
-                          menu           = not (keyEnter (inputState gstate))} 
-                 --Pause key pressed   
-                 | (keyPause (inputState gstate)) = return $ gstate
-                 --GAMEOVER
-                 | (hit gstate) =
-                          return $ gstate {
-                          fallingRegions = newRegions,
-                          player         = updateDeathPlayer (player gstate),
-                          inputState     = (inputState gstate),
-                          elapsedTime    = elapsedTime gstate + secs}
-                 --Normal Gameplay
-                 | otherwise =  
-                          return $ gstate {
-                          menu           = (keyEscape (inputState gstate)),
-                          hit            = (hit gstate ) || isHit (player gstate) newRegions, 
-                          player         = newPlayer,
-                          fallingRegions = newRegions,
-                          elapsedTime    = elapsedTime gstate + secs ,
-                          score          = score gstate + secs }
-                            where newRegions = updateRegionsTick secs (fallingRegions gstate)
-                                  newPlayer  = movePlayer (player gstate) (inputState gstate) (newRegions)                 
--}
-
 step secs gstate =
   let 
       updatedGStateGstate = gstate {
@@ -65,24 +39,27 @@ handleCall :: Maybe Call -> IO GameState -> IO GameState
 handleCall Nothing gs = gs
 handleCall (Just call) gs = 
   case call of
+    QuitGame  -> exitWith ExitSuccess    
     StartLevel options -> do
                             ls <- startLevel options
                             gss <- gs
                             return $ gss {levelState = ls, menuState = (menuState gss){visible = False}}
-    QuitGame -> do
-                  gss <- gs
-                  case visible((menuState )gss ) of
-                    True -> exitWith ExitSuccess
-                    False-> return gss{menuState = (menuState gss){ visible = True } }
     EndGame m -> do
                   gss <- gs
                   return $ gss {levelState = (levelState gss){paused = True}, menuState = endGameMenuState m }
-    otherwise -> gs
+    ShowMenu  -> do
+                  gss <- gs
+                  if visible (menuState gss) then return gss else
+                    return gss{menuState = (menuState gss){ visible = True }, levelState = (levelState gss){ paused = True} }
+    ResumeGame -> do
+                    gss <- gs
+                    if not $ paused (levelState gss) then return gss else
+                      return gss{menuState = (menuState gss){ visible = False }, levelState = (levelState gss){ paused = False} }                      
 
 --temporary, for starting with a loaded level
 
 initializedState :: ([FallingRegion],Float) -> GameState
-initializedState fr = GameState initialInputState initialMenuState (initializeLevelState fr)
+initializedState fr = GameState initialInputState initialMenuState (initializeLevelState fr){paused = True}
 
 ----------------------------------------------
 

@@ -14,6 +14,9 @@ data Player = Player {
               , deathAnimation :: Float    
               , ai             :: Bool                  
               }
+
+initialPlayer :: Player
+initialPlayer = Player False 0 0 False
                 
 data PlayerMovement = Idle | MoveLeft | MoveRight
 
@@ -35,4 +38,4 @@ data LevelState = LevelState{
 }
 
 initialLevelState :: LevelState
-initialLevelState = LevelState False (Player False 0 0 False) (Just (Player False 0 0 False)) [] 0 0 0
+initialLevelState = LevelState False initialPlayer Nothing [] 0 0 0

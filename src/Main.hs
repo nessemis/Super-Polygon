@@ -3,6 +3,7 @@ module Main where
 import Controller
 import Model
 import Level
+import LevelModel
 import View
 
 import Graphics.Gloss.Interface.IO.Game

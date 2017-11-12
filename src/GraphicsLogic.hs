@@ -19,6 +19,8 @@ menuPicture (MenuState True (s@LevelSelect{displacement = displacement})) = Tran
                                                                               menuButton  "Level 3" 100
                                                                              ]
 menuPicture (MenuState True s@(EndGameMessage m)) = menuButton m 0
+menuPicture (MenuState True s@(LevelOptionsSelect options)) = menuButton (show (playOptions options)) 0
+
          
 
 menuButton :: String -> Float -> Picture

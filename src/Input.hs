@@ -8,9 +8,7 @@ import Model
 updateInputState :: InputState -> Caller InputState
 updateInputState inputState = 
     let 
-        call
-            | keyEscPress inputState = Just QuitGame
-            | otherwise              = Nothing
+        call = if keyQPress inputState then Just QuitGame else Nothing
         updatedInputState = inputState {
             keyLeftPress  = False,
             keyRightPress = False,
@@ -40,6 +38,7 @@ inputKey (EventKey (Char c) d _ _) istate
         'd' -> istate {keyD            = down}
         'p' -> istate {keyPause        = down,
                        keyPausePress   = down}
+        'q' -> istate {keyQPress       = down}                       
         _   -> istate 
     where down = d == Down
         
