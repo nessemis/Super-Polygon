@@ -32,7 +32,8 @@ data LevelState = LevelState{
   , elapsedTime    :: Float
   , score          :: Float
   , speed          :: Float
+  , finish         :: Float
 }
 
 initialLevelState :: LevelState
-initialLevelState = LevelState False initialPlayer Nothing [] 0 0 0
+initialLevelState = LevelState False initialPlayer Nothing [] 0 0 0 999

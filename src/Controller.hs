@@ -58,7 +58,7 @@ getLevelPaths = do
 trimHeadString 0 x = x
 trimHeadString n (x:xs) = trimHeadString (n - 1) xs
 
-initializeState :: ([FallingRegion], Float) -> [String] -> GameState
+initializeState :: ([FallingRegion], Float,Float) -> [String] -> GameState
 initializeState fallingRegions levelPaths = GameState initialInputState (initialMenuState levelPaths) (initializeLevelState fallingRegions){paused = True}
 
 ----------------------------------------------

@@ -14,11 +14,11 @@ import Model
 
 import Graphics.Gloss.Data.Color
     
-initializeLevelState :: ([FallingRegion],Float) -> LevelState
-initializeLevelState (fallingRegions, speed) = initialLevelState { fallingRegions = fallingRegions, speed = speed }
+initializeLevelState :: ([FallingRegion],Float,Float) -> LevelState
+initializeLevelState (fallingRegions, speed,finish) = initialLevelState { fallingRegions = fallingRegions, speed = speed,finish = finish }
 
 updateLevelState :: Float -> InputState -> LevelState -> Caller LevelState
-updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elapsedTime score speed) =
+updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elapsedTime score speed finish) =
     let updatedLState
             | hit p1 = lState {
                 player         = updateDeathPlayer p1
@@ -55,7 +55,7 @@ isGameFinished :: LevelState -> Bool
 isGameFinished = isJust . getEndGameMessage
 
 getCall :: LevelState -> InputState -> Maybe Call
-getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _) iState
+getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _ _) iState
     | paused                                   = Nothing
     | isJust endGameMessage                    = Just $ EndGame (fromJust endGameMessage)           
     | keyEscPress iState                       = Just ShowMenu
@@ -63,8 +63,8 @@ getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _) iState
     where endGameMessage = getEndGameMessage lState
 
 getEndGameMessage :: LevelState -> Maybe String
-getEndGameMessage (LevelState paused p1 p2 _ elapsedTime _ _)
-    | elapsedTime >= 20 && not paused          = Just "YOU WON!"
+getEndGameMessage (LevelState paused p1 p2 _ elapsedTime _ _ fin)
+    | elapsedTime >= fin && not paused          = Just "YOU WON!"
     | isJust p2 && hit (fromJust p2) && hit p1 = Just "You both lost!"      
     | hit p1    && not (isJust p2)             = Just "YOU LOST"
     | hit p1    && isJust p2                   = Just "Player 2 Won!"
@@ -125,11 +125,13 @@ startLevel levelParameters = do
         
 -- Functions to modify the level
 
+--Get random seed
 newRand = randomIO :: IO Int
 
-generateRandomLevel :: IO Int -> IO (([FallingRegion]),Float)
+--Gemerate a random level depending on a seed value
+generateRandomLevel :: IO Int -> IO (([FallingRegion]),Float,Float)
 generateRandomLevel s = do birdseed <- s
-                           return ([  rndToFallingRegion(rndToIntList (birdseed+x)) | x <- [0..4] ],fromIntegral(birdseed`mod`3 + 2))
+                           return ([  rndToFallingRegion(rndToIntList (birdseed+x)) | x <- [0..4] ],fromIntegral(birdseed`mod`3 + 2),100)
     
 rndToIntList :: Int -> [Int]
 rndToIntList s = map (abs . (`mod`100)) (take 10 $ randomList s ) 
@@ -143,14 +145,13 @@ rndToFallingRegion xs = map rndToFallingShape xs
 rndToFallingShape :: Int -> FallingShape
 rndToFallingShape x = FallingShape (fromIntegral (x + 5)) 1 (toColor(x`mod`7))
 
+--Load a level from a text file
 
-
--- IMPURE
-
-readLevelFile :: FilePath -> IO ([FallingRegion],Float)
+readLevelFile :: FilePath -> IO ([FallingRegion],Float,Float)
 readLevelFile f = do
             fileContent <- readFile f
-            return ((map lineToFallingRegion (tail(lines fileContent))), read $ head $ (lines fileContent) )
+            return ((map lineToFallingRegion (tail(lines fileContent))), read $ head $ splitOn' (==' ') $ head $ (lines fileContent),
+                                                                         read $ head $ tail $ splitOn' (==' ') $ head $ (lines fileContent))
 
 lineToFallingRegion ::  String -> FallingRegion
 lineToFallingRegion s = map textShapeToFallingShape (splitOn' (==',') s) 
