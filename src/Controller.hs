@@ -9,6 +9,7 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import System.Random
 import System.Exit
+import System.Directory
 
 import MenuModel
 import InputModel
@@ -46,7 +47,7 @@ handleCall (Just call) gs =
                             return $ gss {levelState = ls, menuState = (menuState gss){visible = False}}
     EndGame m -> do
                   gss <- gs
-                  return $ gss {levelState = (levelState gss){paused = True}, menuState = endGameMenuState m }
+                  return $ gss {levelState = (levelState gss){paused = True}, menuState = endGameMenuState m (extractLevelSelectScreen (screen (menuState gss)))}
     ShowMenu  -> do
                   gss <- gs
                   if visible (menuState gss) then return gss else
@@ -58,8 +59,16 @@ handleCall (Just call) gs =
 
 --temporary, for starting with a loaded level
 
-initializedState :: ([FallingRegion],Float) -> GameState
-initializedState fr = GameState initialInputState initialMenuState (initializeLevelState fr){paused = True}
+getLevels :: IO [String]
+getLevels = do
+              levelPaths <- listDirectory "levels\\"
+              return $ map (reverse . (trimHeadString 4) . reverse) levelPaths
+
+trimHeadString 0 string = string
+trimHeadString n (x:xs) = trimHeadString (n - 1) xs
+
+initializedState :: ([FallingRegion],Float) -> [String] -> GameState
+initializedState fr levels = GameState initialInputState (initialMenuState levels) (initializeLevelState fr){paused = True}
 
 ----------------------------------------------
 

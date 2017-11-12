@@ -1,17 +1,24 @@
 module MenuModel where
     
 data MenuState = MenuState {
-    visible         :: Bool,
-    screen          :: Screen
+    visible           :: Bool,
+    screen            :: Screen
 }
 
 data Screen = 
     LevelSelect {
+        buttons         :: [String],
         selectedButton  :: Int,
         displacement    :: Float        
     }
-    | EndGameMessage String
-    | LevelOptionsSelect LevelOptions
+    | EndGameMessage String Screen
+    | LevelOptionsSelect LevelOptions Screen
+
+extractLevelSelectScreen :: Screen -> Screen
+extractLevelSelectScreen screen = case screen of
+    LevelSelect{}                    -> screen
+    EndGameMessage _ levelScreen     -> levelScreen
+    LevelOptionsSelect _ levelScreen -> levelScreen
 
 data LevelOptions = LevelOptions {
     randomOrLoad :: Either Int String, --int is the seed, string the path
@@ -21,11 +28,11 @@ data LevelOptions = LevelOptions {
 data PlayOptions = SinglePlayer | MultiPlayer | Ai deriving Show
     
 
-initialScreen :: Screen
-initialScreen = LevelSelect 0 0
+initialScreen :: [String] -> Screen
+initialScreen buttonStrings = LevelSelect buttonStrings 0 0
 
-initialMenuState :: MenuState
-initialMenuState = MenuState True initialScreen
+initialMenuState :: [String] -> MenuState
+initialMenuState buttonStrings = MenuState True (initialScreen buttonStrings)
 
-endGameMenuState :: String -> MenuState
-endGameMenuState = MenuState True . EndGameMessage
+endGameMenuState :: String -> Screen -> MenuState
+endGameMenuState message levelSelectScreen = MenuState True (EndGameMessage message levelSelectScreen)

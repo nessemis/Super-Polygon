@@ -17,5 +17,5 @@ data Caller a = Caller a (Maybe Call) --The caller and the call
 
 data Call = StartLevel LevelOptions | ShowMenu | ResumeGame | EndGame String | QuitGame
 
-initialState :: GameState
-initialState = GameState initialInputState initialMenuState initialLevelState
+initialState :: [String] -> GameState
+initialState buttonStrings = GameState initialInputState (initialMenuState buttonStrings) initialLevelState
