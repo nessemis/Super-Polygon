@@ -2,9 +2,6 @@ module LevelModel where
 
 import Graphics.Gloss.Data.Color
     
-fallspeed :: Float
-fallspeed = 1
-
 drawingDistance :: Float
 drawingDistance = 30
 

@@ -13,11 +13,11 @@ import System.Random
 
 menuPicture :: MenuState -> Picture
 menuPicture (MenuState False _) = Blank
-menuPicture (MenuState True (s@LevelSelect{displacement = displacement, buttons = buttonStrings})) = Translate (displacement * (-50)) 0 $ 
-                                                                    pictures [menuButton buttonString (fromIntegral (50 * n)) | n <- [0..(length fullList - 1)], let buttonString = fullList !! n]
-                                                                    where fullList = "RANDOM" : buttonStrings
+menuPicture (MenuState True (s@LevelSelect{displacement = displacement, levels = levelStrings})) = Translate (displacement * (-50)) 0 $ 
+                                                                    pictures [menuButton buttonString (fromIntegral (50 * n)) | n <- [0..length allLevelStrings - 1], let buttonString = allLevelStrings !! n]
+                                                                    where allLevelStrings = "RANDOM" : levelStrings
 menuPicture (MenuState True s@(EndGameMessage m _)) = menuSplash m 
-menuPicture (MenuState True s@(LevelOptionsSelect options _)) = menuButton (show (playOptions options)) 0
+menuPicture (MenuState True s@(LevelOptionsSelect options _)) = menuButton (show (levelOption options)) 0
 
          
 

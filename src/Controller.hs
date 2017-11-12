@@ -22,56 +22,49 @@ import Level
 
 -- | Handle one iteration of the game
 step :: Float -> GameState -> IO GameState
-step secs gstate =
+step secs gState@GameState{ inputState = iState, menuState = mState, levelState = lState} =
   let 
-      updatedGStateGstate = gstate {
+      updatedGStateGstate = gState {
         inputState = updatedInputState,
         menuState  = updatedMenuState,
         levelState = updatedLevelState
       }
   in
-    handleCall call1 $ handleCall call2 $ handleCall call3 (return updatedGStateGstate)
+    return updatedGStateGstate >>= handleCall call1 >>= handleCall call2 >>= handleCall call3
   where
-    (Caller updatedInputState call1) = updateInputState (inputState gstate)
-    (Caller updatedMenuState call2) = updateMenuState (inputState gstate) (menuState gstate)
-    (Caller updatedLevelState call3) = updateLevelState secs (inputState gstate) (levelState gstate)
+    (Caller updatedInputState call1) = updateInputState iState
+    (Caller updatedMenuState call2) = updateMenuState iState mState
+    (Caller updatedLevelState call3) = updateLevelState secs iState lState
 
-handleCall :: Maybe Call -> IO GameState -> IO GameState
-handleCall Nothing gs = gs
-handleCall (Just call) gs = 
+handleCall :: Maybe Call -> GameState -> IO GameState
+handleCall Nothing gState = return gState
+handleCall (Just call) gState@GameState{ menuState = mState, levelState = lState} = 
   case call of
     QuitGame  -> exitWith ExitSuccess    
-    StartLevel options -> do
-                            ls <- startLevel options
-                            gss <- gs
-                            return $ gss {levelState = ls, menuState = (menuState gss){visible = False}}
-    EndGame m -> do
-                  gss <- gs
-                  return $ gss {levelState = (levelState gss){paused = True}, menuState = endGameMenuState m (extractLevelSelectScreen (screen (menuState gss)))}
-    ShowMenu  -> do
-                  gss <- gs
-                  if visible (menuState gss) then return gss else
-                    return gss{menuState = (menuState gss){ visible = True }, levelState = (levelState gss){ paused = True} }
-    ResumeGame -> do
-                    gss <- gs
-                    if not $ paused (levelState gss) then return gss else
-                      return gss{menuState = (menuState gss){ visible = False }, levelState = (levelState gss){ paused = False} }                      
+    StartLevel parameters -> do
+                               updatedLState <- startLevel parameters
+                               return $ gState{ levelState = updatedLState, menuState = mState{visible = False}}
+    EndGame message -> return $ gState { levelState = lState{paused = True}, menuState = endGameMenuState message . extractLevelSelectScreen . screen $ mState}
+    ShowMenu   -> if visible (mState) then return gState else
+                    return gState{ menuState = mState{ visible = True }, levelState = lState{ paused = True} }
+    ResumeGame -> if not $ paused lState then return gState else
+                      return gState{ menuState = mState{ visible = False }, levelState = lState{ paused = False} }                      
 
 --temporary, for starting with a loaded level
 
-getLevels :: IO [String]
-getLevels = do
+getLevelPaths :: IO [String]
+getLevelPaths = do
               levelPaths <- listDirectory "levels\\"
               return $ map (reverse . (trimHeadString 4) . reverse) levelPaths
 
-trimHeadString 0 string = string
+trimHeadString 0 x = x
 trimHeadString n (x:xs) = trimHeadString (n - 1) xs
 
-initializedState :: ([FallingRegion],Float) -> [String] -> GameState
-initializedState fr levels = GameState initialInputState (initialMenuState levels) (initializeLevelState fr){paused = True}
+initializeState :: ([FallingRegion], Float) -> [String] -> GameState
+initializeState fallingRegions levelPaths = GameState initialInputState (initialMenuState levelPaths) (initializeLevelState fallingRegions){paused = True}
 
 ----------------------------------------------
 
 -- | Handle user input
 input :: Event -> GameState -> IO GameState
-input e gstate = return gstate {inputState = inputKey e (inputState gstate)}
+input e gState@GameState{ inputState = iState } = return gState{inputState = inputKey e iState}

@@ -15,108 +15,101 @@ import Model
 import Graphics.Gloss.Data.Color
     
 initializeLevelState :: ([FallingRegion],Float) -> LevelState
-initializeLevelState (fr,sp) = initialLevelState {fallingRegions = fr, speed = sp}
+initializeLevelState (fallingRegions, speed) = initialLevelState { fallingRegions = fallingRegions, speed = speed }
 
 updateLevelState :: Float -> InputState -> LevelState -> Caller LevelState
-updateLevelState secs input lvlState =
-    let 
-        updatedGameState
-            | paused lvlState  = lvlState {
+updateLevelState secs input lState@(LevelState paused p1 p2 fallingRegions elapsedTime score speed) =
+    let updatedGameState
+            | paused = lState {
                 player         = updateDeathPlayer p1,
                
                 paused         = not $ keyPausePress input         
             }
-            | hit p1 = lvlState {
+            | hit p1 = lState {
                 player         = updateDeathPlayer p1,
-                fallingRegions = newRegions
+                fallingRegions = updatedFallingRegions
             }
-            | isJust p2 && hit jp2 = lvlState {
+            | isJust p2 && hit jp2 = lState {
                 player2        = Just (updateDeathPlayer jp2),
-                fallingRegions = newRegions
+                fallingRegions = updatedFallingRegions
             }
-            | otherwise        = lvlState {
+            | otherwise        = lState {
                 paused         = keyPausePress input, 
-                player         = p1 { hit = hit p1 || isHit p1 newRegions,
+                player         = p1 { hit = hit p1 || isHit p1 updatedFallingRegions,
                                       location = newPlayerLocation},
-                fallingRegions = newRegions,
-                elapsedTime    = elapsedTime lvlState + secs ,
-                score          = score lvlState + secs,
-                player2        = if isJust p2 then 
-                    Just jp2{ hit      = hit jp2 || isHit jp2 newRegions,
-                         location = newPlayer2Location}
-                    else p2
-
+                fallingRegions = updatedFallingRegions,
+                elapsedTime    = elapsedTime + secs ,
+                score          = score + secs,
+                player2        = if isJust p2 then Just jp2{ hit = hit jp2 || isHit jp2 updatedFallingRegions, location = newPlayer2Location} else p2
             }
     in
-        Caller updatedGameState (getCall updatedGameState input)
+        Caller updatedGameState $ getCall updatedGameState input
     where
-        p1         = player lvlState
-        p2         = player2 lvlState
         jp2        = fromJust p2
-        newRegions = updateRegionsTick (speed lvlState) secs (fallingRegions lvlState)
+        updatedFallingRegions = updateRegionsTick speed secs fallingRegions
         newPlayerLocation  = case p1 of
-            (Player _ _ _ False) -> movePlayer p1 (inputToMovement input) newRegions
-            (Player _ _ _ True)  -> movePlayer p1 (movementAi lvlState p1) newRegions            
+            (Player _ _ _ False) -> movePlayer p1 (inputToMovement input) updatedFallingRegions
+            (Player _ _ _ True)  -> movePlayer p1 (movementAi lState p1) updatedFallingRegions            
         newPlayer2Location = case p2 of
-            Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovement2 input) newRegions
-            Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lvlState jp2) newRegions
+            Just p@(Player _ _ _ False)  -> movePlayer p (inputToMovementP2 input) updatedFallingRegions
+            Just p@(Player _ _ _ True)   -> movePlayer p (movementAi lState jp2) updatedFallingRegions
 
 getCall :: LevelState -> InputState -> Maybe Call
-getCall ls input
-    | paused ls                                               = Nothing
-    | keyEscPress input                                       = Just ShowMenu
-    | elapsedTime ls >= 20 && (not (paused ls))               = Just (EndGame "YOU WON!")
-    | isJust (player2 ls) && hit (fromJust (player2 ls)) && hit (player ls) = Just (EndGame "You both lost!")        
-    | hit (player ls) && not (isJust (player2 ls))            = Just (EndGame "YOU LOST")
-    | hit (player ls) && isJust (player2 ls)                  = Just (EndGame "Player 1 Won!")
-    | isJust (player2 ls) && hit (fromJust (player2 ls))      = Just (EndGame "Player 2 Won!")    
-    | hit (player ls) && not (isJust (player2 ls))            = Just (EndGame "YOU LOST")    
-    | otherwise                                               = Nothing
+getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _) iState
+    | paused                                   = Nothing
+    | keyEscPress iState                       = Just ShowMenu
+    | elapsedTime >= 20 && not paused          = Just (EndGame "YOU WON!")
+    | isJust p2 && hit (fromJust p2) && hit p1 = Just (EndGame "You both lost!")        
+    | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")
+    | hit p1    && isJust p2                   = Just (EndGame "Player 1 Won!")
+    | isJust p2 && hit (fromJust p2)           = Just (EndGame "Player 2 Won!")    
+    | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")    
+    | otherwise                                = Nothing
 
 inputToMovement :: InputState -> PlayerMovement
-inputToMovement is 
-                | keyLeft is  = MoveLeft
-                | keyRight is = MoveRight
-                | otherwise   = Idle
+inputToMovement lState 
+                | keyLeft lState  = MoveLeft
+                | keyRight lState = MoveRight
+                | otherwise       = Idle
 
-inputToMovement2 :: InputState -> PlayerMovement
-inputToMovement2 is 
-                | keyA is  = MoveLeft
-                | keyD is = MoveRight
+inputToMovementP2 :: InputState -> PlayerMovement
+inputToMovementP2 lState 
+                | keyA lState = MoveLeft
+                | keyD lState = MoveRight
                 | otherwise   = Idle
 
 movementAi :: LevelState -> Player -> PlayerMovement
-movementAi lvlState p = closestRegionLocation p (fallingRegions lvlState)
+movementAi LevelState{fallingRegions = fallingRegions} player = closestRegionLocation player fallingRegions
 
 closestRegionLocation :: Player -> [FallingRegion] -> PlayerMovement
-closestRegionLocation p r 
-    | abs direction <= 0.2 = Idle
-    | direction >= 0       = MoveRight
-    | direction <= 0       = MoveLeft
-    where preferredLocation = fromIntegral (fst (head (findHighest (zip [0..] (map firstCollidableRegion r))))) + 0.5
-          halfRegions       = (fromIntegral (length r)) / 2
-          distance          = preferredLocation - location p
-          direction         = if abs distance >= halfRegions then abs (distance / distance) * (-2) * halfRegions + distance else distance
+closestRegionLocation Player{location = location} fallingRegions 
+    | abs direction <= 0.2  = Idle
+    | direction >= 0        = MoveRight
+    | direction <= 0        = MoveLeft
+    where preferredLocation = 0.5 + (fromIntegral $ (fst . head . findHighestFallingShape) $ zip [0..] $ map closestShape fallingRegions)
+          halfRegions       = (fromIntegral $ length fallingRegions) / 2
+          distance          = preferredLocation - location
+          direction         = if abs distance >= halfRegions then (abs distance) / distance * (-2) * halfRegions + distance else distance
           
-firstCollidableRegion :: [FallingShape] -> FallingShape
-firstCollidableRegion region  
-    | length region == 0               = FallingShape 100 1 (black)
-    | extractHeight (head region) <= 3 = firstCollidableRegion (tail region)
-    | otherwise                        = head region
+closestShape :: [FallingShape] -> FallingShape
+closestShape fallingRegion  
+    | length fallingRegion == 0        = FallingShape 100 1 black --Just pretent the shape is really far away
+    | extractHeight (head fallingRegion) <= 3 = closestShape (tail fallingRegion)
+    | otherwise                        = head fallingRegion
 
-findHighest :: [(Int, FallingShape)] -> [(Int, FallingShape)]
-findHighest [x]    = [x]
-findHighest (x:xs) = let y = head xs in
+findHighestFallingShape :: [(Int, FallingShape)] -> [(Int, FallingShape)] --Initially, we try to find the falling sh
+findHighestFallingShape [x]    = [x]
+findHighestFallingShape (x:xs) = let y = head xs in
             if (extractHeight . snd) x > (extractHeight . snd) y
-                then findHighest $ x:(tail xs) else findHighest xs
+                then findHighestFallingShape $ x:(tail xs) else findHighestFallingShape xs
 
-startLevel :: LevelOptions -> IO LevelState
-startLevel options = do
-                        x <- case (randomOrLoad options) of
+startLevel :: LevelParameters -> IO LevelState
+startLevel levelParameters = do
+                        x <- case (randomOrLoad levelParameters) of
                                 Right path -> readLevelFile path
                                 Left int -> generateRandomLevel newRand
                         let initialLevel = initializeLevelState x
-                            level = case playOptions options of
+                            level = case levelOption levelParameters of
                                 SinglePlayer -> initialLevel
                                 MultiPlayer  -> initialLevel{player2 = Just initialPlayer}
                                 Ai           -> initialLevel{player2 = Just (initialPlayer{ai = True})}

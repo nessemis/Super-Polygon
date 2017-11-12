@@ -19,27 +19,27 @@ updateInputState inputState =
         in Caller updatedInputState call
 
 inputKey :: Event -> InputState -> InputState
-inputKey (EventKey (SpecialKey c) d _ _) istate
+inputKey (EventKey (SpecialKey c) d _ _) iState
   = case c of
-      KeyLeft  -> istate {keyLeft       = down,
+      KeyLeft  -> iState {keyLeft       = down,
                           keyLeftPress  = down}
-      KeyRight -> istate {keyRight      = down,
+      KeyRight -> iState {keyRight      = down,
                           keyRightPress = down}
-      KeyEsc   -> istate {keyEscPress   = down}
-      KeyEnter -> istate {keyEnterPress = down}
-      _        -> istate
+      KeyEsc   -> iState {keyEscPress   = down}
+      KeyEnter -> iState {keyEnterPress = down}
+      _        -> iState
   where down = d == Down
       
 
 --Check for normal keys
-inputKey (EventKey (Char c) d _ _) istate
+inputKey (EventKey (Char c) d _ _) iState
    = case c of
-        'a' -> istate {keyA            = down}
-        'd' -> istate {keyD            = down}
-        'p' -> istate {keyPause        = down,
+        'a' -> iState {keyA            = down}
+        'd' -> iState {keyD            = down}
+        'p' -> iState {keyPause        = down,
                        keyPausePress   = down}
-        'q' -> istate {keyQPress       = down}                       
-        _   -> istate 
+        'q' -> iState {keyQPress       = down}                       
+        _   -> iState 
     where down = d == Down
         
-inputKey _ istate = istate -- Otherwise keep the same
+inputKey _ iState = iState -- Otherwise keep the same

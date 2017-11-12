@@ -7,12 +7,12 @@ data MenuState = MenuState {
 
 data Screen = 
     LevelSelect {
-        buttons         :: [String],
-        selectedButton  :: Int,
-        displacement    :: Float        
+        levels         :: [String],
+        selectedButton :: Int,
+        displacement   :: Float        
     }
     | EndGameMessage String Screen
-    | LevelOptionsSelect LevelOptions Screen
+    | LevelOptionsSelect LevelParameters Screen
 
 extractLevelSelectScreen :: Screen -> Screen
 extractLevelSelectScreen screen = case screen of
@@ -20,19 +20,19 @@ extractLevelSelectScreen screen = case screen of
     EndGameMessage _ levelScreen     -> levelScreen
     LevelOptionsSelect _ levelScreen -> levelScreen
 
-data LevelOptions = LevelOptions {
+data LevelParameters = LevelParameters {
     randomOrLoad :: Either Int String, --int is the seed, string the path
-    playOptions  :: PlayOptions
+    levelOption  :: LevelOptions
 }
 
-data PlayOptions = SinglePlayer | MultiPlayer | Ai deriving Show
+data LevelOptions = SinglePlayer | MultiPlayer | Ai deriving Show
     
 
 initialScreen :: [String] -> Screen
 initialScreen buttonStrings = LevelSelect buttonStrings 0 0
 
 initialMenuState :: [String] -> MenuState
-initialMenuState buttonStrings = MenuState True (initialScreen buttonStrings)
+initialMenuState buttonStrings = MenuState True $ initialScreen buttonStrings
 
 endGameMenuState :: String -> Screen -> MenuState
-endGameMenuState message levelSelectScreen = MenuState True (EndGameMessage message levelSelectScreen)
+endGameMenuState message levelSelectScreen = MenuState True $ EndGameMessage message levelSelectScreen
