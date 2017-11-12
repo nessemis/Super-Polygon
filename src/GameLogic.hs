@@ -48,4 +48,4 @@ isHit p newRegions = or $ map shapeHitPlayer regionMap
   where 
        shapeHitPlayer (FallingShape h s _) = (h <= 3 && h + s >= 3)
        regionMap                         = currentRegion newRegions --Checks if any of the current regions hit the player.
-       currentRegion r                   = r !! (floor (location p))           --Obtains the region in which the player is from both new and old regions.
+       currentRegion r                   = r !! (floor (location p))--Obtains the region in which the player is from both new and old regions.

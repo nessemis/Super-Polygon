@@ -61,8 +61,8 @@ getCall lState@(LevelState paused p1 p2 _ elapsedTime _ _) iState
     | elapsedTime >= 20 && not paused          = Just (EndGame "YOU WON!")
     | isJust p2 && hit (fromJust p2) && hit p1 = Just (EndGame "You both lost!")        
     | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")
-    | hit p1    && isJust p2                   = Just (EndGame "Player 1 Won!")
-    | isJust p2 && hit (fromJust p2)           = Just (EndGame "Player 2 Won!")    
+    | hit p1    && isJust p2                   = Just (EndGame "Player 2 Won!")
+    | isJust p2 && hit (fromJust p2)           = Just (EndGame "Player 1 Won!")    
     | hit p1    && not (isJust p2)             = Just (EndGame "YOU LOST")    
     | otherwise                                = Nothing
 
