@@ -14,6 +14,7 @@ import System.Directory
 import MenuModel
 import InputModel
 import LevelModel
+import GraphicsModel
 
 
 import Menu
@@ -58,8 +59,10 @@ getLevelPaths = do
 trimHeadString 0 x = x
 trimHeadString n (x:xs) = trimHeadString (n - 1) xs
 
-initializeState :: ([FallingRegion], Float,Float) -> [String] -> GameState
-initializeState fallingRegions levelPaths = GameState initialInputState (initialMenuState levelPaths) (initializeLevelState fallingRegions){paused = True}
+
+
+initializeState :: ([FallingRegion], Float,Float) -> [String] -> Int -> GameState
+initializeState fallingRegions levelPaths seed = GameState initialInputState (initialMenuState levelPaths) (initializeLevelState fallingRegions){paused = True} (initialAnimationState seed)
 
 ----------------------------------------------
 
