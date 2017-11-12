@@ -28,16 +28,16 @@ menuPicture (MenuState True s@(LevelOptionsSelect options _)) = menuButton (show
 --Draw a nice menu button with a text
 menuButton :: String -> Float -> Picture
 menuButton name pos =  Translate pos 0 $ scale 20 20 $ pictures [
-                                            rotate 45 $ Color (makeColor 0.6 0.6 0.6 1) $ regularNPolygon 4,
-                                            rotate 45 $ color blue$ regularNLine 4,
+                                            rotate 45 $ Color (makeColor 0.6 0.6 0.6 0.9) $ regularNPolygon 4,
+                                            rotate 45 $Color (makeColor 0.1 0.1 0.6 0.9) $ regularNLine 4,
                                             Translate ((-0.025)*fromIntegral(length name)) 0 $ scale 0.001 0.001 $ color blue  $ Text name
                                             ]
                                             
 --Draw a splash screen for winning or losing
 menuSplash :: String -> Picture
 menuSplash name = Translate (0) (10) $ scale 20 5 $ pictures [
-                                            rotate 45 $ Color (makeColor 0.2 0.2 0.2 1) $ regularNPolygon 4,
-                                            rotate 45 $ color blue$ regularNLine 4,
+                                            rotate 45 $ Color (makeColor 0.2 0.2 0.2 0.75) $ regularNPolygon 4,
+                                            rotate 45 $ Color (makeColor 0.6 0.6 0.6 0.75)   $ regularNLine 4,
                                             Translate ((-0.04)*fromIntegral(length name)) 0 $ scale 0.001 0.004 $ color red  $ Text name
                                             ]
 
