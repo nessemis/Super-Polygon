@@ -16,7 +16,8 @@ menuPicture (MenuState False _) = Blank
 menuPicture (MenuState True (s@LevelSelect{displacement = displacement})) = Translate (displacement * (-50)) 0 $ 
                                                                     pictures [menuButton ("Level 1") 0,
                                                                               menuButton  "Level 2" 50,
-                                                                              menuButton  "Level 3" 100
+                                                                              menuButton  "Level 3" 100,
+                                                                              menuButton "RANDOM" 150
                                                                              ]
 menuPicture (MenuState True s@(EndGameMessage m)) = menuButton m 0
 menuPicture (MenuState True s@(LevelOptionsSelect options)) = menuButton (show (playOptions options)) 0

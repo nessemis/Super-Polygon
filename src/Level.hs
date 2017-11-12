@@ -5,6 +5,8 @@ import Control.Monad
 import Control.Monad.IO.Class
 import GameLogic
 
+import System.Random
+
 import LevelModel
 import MenuModel
 import InputModel
@@ -110,7 +112,7 @@ startLevel :: LevelOptions -> IO LevelState
 startLevel options = do
                         x <- case (randomOrLoad options) of
                                 Right path -> readLevelFile path
-                                Left int -> undefined
+                                Left int -> generateRandomLevel newRand
                         let initialLevel = initializeLevelState x
                             level = case playOptions options of
                                 SinglePlayer -> initialLevel
@@ -120,6 +122,25 @@ startLevel options = do
                         
         
 -- Functions to modify the level
+
+newRand = randomIO :: IO Int
+
+generateRandomLevel :: IO Int -> IO (([FallingRegion]),Float)
+generateRandomLevel s = do birdseed <- s
+                           return ([  rndToFallingRegion(rndToIntList (birdseed+x)) | x <- [0..5] ],1)
+    
+rndToIntList :: Int -> [Int]
+rndToIntList s = map (abs . (`mod`100)) (take 10 $ randomList s ) 
+    
+randomList :: Int -> [Int]
+randomList seed = randoms (mkStdGen seed) :: [Int] 
+
+rndToFallingRegion :: [Int] -> FallingRegion
+rndToFallingRegion xs = map rndToFallingShape xs  
+
+rndToFallingShape :: Int -> FallingShape
+rndToFallingShape x = FallingShape (fromIntegral x) 1 (toColor(x`mod`7))
+
 
 
 -- IMPURE

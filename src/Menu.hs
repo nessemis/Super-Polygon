@@ -15,9 +15,10 @@ updateMenuState is menuState
 updateCurrentScreen :: InputState -> Screen -> (Screen, Maybe Call)
 updateCurrentScreen (InputState{keyEscPress = True}) s   = (s, Just ResumeGame)
 updateCurrentScreen is (s@LevelSelect{}) 
-      | keyRightPress is = (s{selectedButton = if ((sel + 1) < 3) then sel + 1 else sel}, Nothing)
+      | keyRightPress is = (s{selectedButton = if ((sel + 1) < 4) then sel + 1 else sel}, Nothing)
       | keyLeftPress  is = (s{selectedButton = if ((sel - 1) >= 0) then sel - 1 else sel}, Nothing)        
-      | keyEnterPress is = (LevelOptionsSelect (LevelOptions (Right ("lvl" ++ (show sel) ++ ".txt" )) SinglePlayer), Nothing)
+      | keyEnterPress is = if sel == 3 then (LevelOptionsSelect (LevelOptions (Left sel) SinglePlayer), Nothing)
+                            else            (LevelOptionsSelect (LevelOptions (Right ("lvl" ++ (show sel) ++ ".txt" )) SinglePlayer), Nothing)
       | otherwise        = ((updateDisplacement s), Nothing)
       where sel = selectedButton s
 updateCurrentScreen is s@(EndGameMessage m) 
