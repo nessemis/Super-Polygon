@@ -94,7 +94,7 @@ closestRegionLocation p r
     where preferredLocation = fromIntegral (fst (head (findHighest (zip [0..] (map firstCollidableRegion r))))) + 0.5
           halfRegions       = (fromIntegral (length r)) / 2
           distance          = preferredLocation - location p
-          direction         = if abs distance >= halfRegions then abs distance / distance * (-2) * halfRegions + distance else distance
+          direction         = if abs distance >= halfRegions then abs (distance / distance) * (-2) * halfRegions + distance else distance
           
 firstCollidableRegion :: [FallingShape] -> FallingShape
 firstCollidableRegion region  
@@ -127,7 +127,7 @@ newRand = randomIO :: IO Int
 
 generateRandomLevel :: IO Int -> IO (([FallingRegion]),Float)
 generateRandomLevel s = do birdseed <- s
-                           return ([  rndToFallingRegion(rndToIntList (birdseed+x)) | x <- [0..5] ],1)
+                           return ([  rndToFallingRegion(rndToIntList (birdseed+x)) | x <- [0..4] ],fromIntegral(birdseed`mod`3 + 2))
     
 rndToIntList :: Int -> [Int]
 rndToIntList s = map (abs . (`mod`100)) (take 10 $ randomList s ) 
@@ -139,7 +139,7 @@ rndToFallingRegion :: [Int] -> FallingRegion
 rndToFallingRegion xs = map rndToFallingShape xs  
 
 rndToFallingShape :: Int -> FallingShape
-rndToFallingShape x = FallingShape (fromIntegral x) 1 (toColor(x`mod`7))
+rndToFallingShape x = FallingShape (fromIntegral (x + 5)) 1 (toColor(x`mod`7))
 
 
 
